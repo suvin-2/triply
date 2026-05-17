@@ -243,3 +243,16 @@ npm run test:e2e      # Playwright E2E (자동으로 dev 서버 띄움)
 
 ### Playwright MCP
 `~/.claude/mcp.json` 에 설정되어 있음. Claude Code 재시작 후 `playwright` MCP 도구로 브라우저 자동화 가능.
+
+---
+
+## 정책 문서
+서비스 정책은 `docs/POLICY.md` 를 참고.
+구현 시 정책값을 반드시 준수할 것.
+확정되지 않은 정책(추천값/미결정)은 구현 전 확인 필요.
+
+---
+
+## 커밋 메시지 정책
+커밋 메시지는 docs/COMMIT_POLICY.md 정책을 따를 것.
+형식: [타입] 한국어 제목 (50자 이내)
