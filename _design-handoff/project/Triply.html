@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Triply — 여행 정산</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+
+<style>
+  :root {
+    --ink: #0A0A0A;
+    --paper: #F4F1EA;
+    --paper-2: #ECE7DB;
+    --card: #FFFFFF;
+    --line: #1A1A1A;
+    --line-soft: #D6D0C2;
+    --mute: #8C8579;
+    --accent: oklch(0.66 0.21 32);   /* warm coral red */
+    --accent-ink: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-feature-settings: 'tnum' 1; }
+
+  /* Stage */
+  #stage {
+    width: 100vw; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 20% 0%, #ECE7DB 0%, transparent 60%),
+      var(--paper);
+    position: relative;
+    padding: 40px;
+    gap: 56px;
+    overflow: hidden;
+  }
+  /* Subtle grid */
+  #stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(10,10,10,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%);
+    z-index: 0;
+  }
+
+  /* Phone frame */
+  .phone-wrap {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    background: var(--card);
+    border-radius: 44px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    transform-origin: center center;
+  }
+  /* Subtle grid for swiss vibe */
+  #stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(10,10,10,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%);
+    z-index: 0;
+  }
+
+  /* Caption + rail flex columns alongside the phone */
+  .caption, .rail { position: relative; z-index: 2; flex-shrink: 0; }
+
+  /* Phone island/status bar/etc */
+  .phone-island {
+    position: absolute;
+    top: 11px; left: 50%;
+    transform: translateX(-50%);
+    width: 110px; height: 32px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+  .phone-status {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 54px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 32px 8px;
+    z-index: 80;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  .phone-status .icons { display: flex; gap: 6px; align-items: center; }
+  .phone-status .icons svg { display: block; }
+
+  .phone-screen {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .phone-home {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; background: var(--ink); border-radius: 100px; opacity: 0.85;
+    z-index: 95;
+  }
+
+  /* Header (caption to the side of phone) */
+  .caption {
+    width: 260px;
+    align-self: stretch;
+    display: flex; flex-direction: column;
+  }
+  .caption .brand {
+    font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 600; color: var(--ink); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .caption .brand .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 100%; }
+  .caption h1 {
+    font-size: 40px; line-height: 1.05; font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .caption h1 em { font-style: normal; font-weight: 300; color: var(--mute); }
+  .caption p { font-size: 13px; line-height: 1.6; color: var(--mute); max-width: 260px; }
+  .caption .meta { margin-top: 22px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); }
+
+  /* Screen jumper rail */
+  .rail {
+    width: 150px;
+    align-self: stretch;
+    display: flex; flex-direction: column; gap: 2px;
+    border-left: 1px solid var(--line);
+    padding: 4px 0 4px 16px;
+  }
+  .rail .label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); margin-bottom: 8px; }
+  .rail button {
+    background: none; border: none; padding: 6px 0 6px 0;
+    text-align: left; cursor: pointer;
+    font-family: inherit;
+    display: flex; align-items: baseline; gap: 10px;
+    color: var(--mute);
+    font-size: 13px;
+  }
+  .rail button .num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; color: var(--mute); width: 18px; }
+  .rail button.active { color: var(--ink); font-weight: 600; }
+  .rail button.active .num { color: var(--accent); }
+  .rail button:hover { color: var(--ink); }
+
+  .footnote {
+    margin-top: auto;
+    font-size: 10px; color: var(--mute);
+    letter-spacing: 0.04em;
+  }
+  .footnote .acc { color: var(--accent); }
+
+  /* Buttons inside app */
+  button { font-family: inherit; }
+
+  /* Print receipt paper texture (for screen 5 — defined globally so it's available) */
+  .paper {
+    background-color: #FBF8F1;
+    background-image:
+      radial-gradient(circle at 30% 20%, rgba(0,0,0,0.025) 0, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(0,0,0,0.018) 0, transparent 40%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* Hide scrollbars inside phone */
+  .phone-screen ::-webkit-scrollbar { display: none; }
+  .phone-screen * { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Disable text selection on UI chrome */
+  .no-sel { user-select: none; -webkit-user-select: none; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="caption">
+      <div class="brand"><span class="dot"></span> Triply</div>
+      <h1>여행이 끝나면<br/><em>송금만 남는다.</em></h1>
+      <p>실시간으로 입력하고, 한 번에 정산하는<br/>여행 가계부. 회원가입 없이 링크 하나로.</p>
+      <div class="meta">초기 시안 · v0.1 · 2026.05</div>
+      <div class="footnote">
+        Pretendard · JetBrains Mono<br/>
+        <span class="acc">●</span> oklch(0.66 0.21 32)
+      </div>
+    </div>
+
+    <div class="phone-wrap" id="phone-wrap">
+    <div class="phone no-sel">
+      <div class="phone-island"></div>
+      <div class="phone-status">
+        <span class="mono">9:41</span>
+        <span class="icons">
+          <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="0.5" fill="currentColor"/><rect x="5" y="4" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="10" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 3.2C10.2 3.2 12 4.1 13.4 5.4l1-1C12.7 2.7 10.4 1.6 8 1.6S3.3 2.7 1.6 4.5l1 1C4 4.1 5.8 3.2 8 3.2z" fill="currentColor"/><path d="M8 6.5c1.3 0 2.5.5 3.4 1.3l1-1C11.2 5.7 9.7 5 8 5s-3.2.7-4.4 1.8l1 1C5.5 7 6.7 6.5 8 6.5z" fill="currentColor"/><circle cx="8" cy="10" r="1.4" fill="currentColor"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="19" height="8" rx="1" fill="currentColor"/><rect x="23.5" y="4" width="1.5" height="4" rx="0.5" fill="currentColor" opacity="0.4"/></svg>
+        </span>
+      </div>
+      <div class="phone-screen" id="screen-root"></div>
+      <div class="phone-home"></div>
+    </div>
+    </div>
+
+    <div class="rail">
+      <div class="label">Screens</div>
+      <button data-jump="home"><span class="num">01</span> 홈</button>
+      <button data-jump="create"><span class="num">02</span> 새 여행</button>
+      <button data-jump="trip"><span class="num">03</span> 지출 목록</button>
+      <button data-jump="add"><span class="num">04</span> 지출 추가</button>
+      <button data-jump="settle"><span class="num">05</span> 정산 결과</button>
+    </div>
+  </div>
+
+  <script>
+    // Scale phone to fit available height
+    (function() {
+      const wrap = document.getElementById('phone-wrap');
+      const phone = wrap && wrap.querySelector('.phone');
+      if (!phone) return;
+      function fit() {
+        const avail = window.innerHeight - 40;
+        const k = Math.min(1, avail / 844);
+        phone.style.transform = `scale(${k})`;
+        wrap.style.width = (390 * k) + 'px';
+        wrap.style.height = (844 * k) + 'px';
+      }
+      fit();
+      window.addEventListener('resize', fit);
+    })();
+  </script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="triply-receipt.jsx"></script>
+  <script type="text/babel" src="triply-screens.jsx"></script>
+  <script type="text/babel" src="triply-app.jsx"></script>
+</body>
+</html>

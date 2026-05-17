@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여행 정산 앱 와이어프레임</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; padding: 24px; color: #1a1a1a; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+  .meta { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab { padding: 8px 16px; border-radius: 20px; border: 1px solid #ddd; font-size: 13px; cursor: pointer; background: #fff; color: #666; transition: all 0.15s; }
+  .tab:hover { background: #f0f0f0; }
+  .tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  .screen { display: none; }
+  .screen.active { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-num { font-size: 11px; color: #999; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  .phone { width: 240px; background: #fff; border-radius: 32px; border: 1.5px solid #e0e0e0; padding: 16px 14px 20px; min-height: 460px; }
+  .status { display: flex; justify-content: space-between; margin-bottom: 18px; padding: 0 4px; }
+  .status span { font-size: 10px; color: #aaa; }
+
+  .info { flex: 1; min-width: 260px; }
+  .info h3 { font-size: 15px; font-weight: 500; margin-bottom: 14px; color: #1a1a1a; }
+  .info p { font-size: 13px; color: #666; line-height: 1.7; margin-bottom: 16px; }
+
+  .comp-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .comp-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #555; }
+  .comp-tag { background: #f5f5f0; border: 1px solid #e0e0e0; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-family: monospace; color: #444; white-space: nowrap; }
+
+  .note { background: #f9f9f6; border: 1px solid #eee; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #666; line-height: 1.7; }
+  .note strong { color: #1a1a1a; font-weight: 500; }
+
+  /* wireframe elements */
+  .wf-label { font-size: 9px; color: #bbb; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; margin-top: 2px; }
+  .wf-box { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 8px 10px; margin-bottom: 7px; }
+  .wf-box.filled { background: #1a1a1a; }
+  .wf-box.filled .wf-t { color: #fff; }
+  .wf-box.muted { background: #fafafa; }
+  .wf-t { font-size: 12px; color: #1a1a1a; font-weight: 500; }
+  .wf-s { font-size: 10px; color: #aaa; margin-top: 2px; }
+  .wf-row { display: flex; gap: 6px; margin-bottom: 7px; }
+  .wf-row > .wf-box { flex: 1; margin-bottom: 0; }
+  .wf-tag { display: inline-block; background: #f5f5f0; border: 1px solid #e0e0e0; border-radius: 10px; padding: 2px 8px; font-size: 10px; color: #555; margin: 2px 2px 2px 0; }
+  .wf-tag.add { color: #aaa; border-style: dashed; }
+  .wf-divider { border: none; border-top: 1px solid #eee; margin: 8px 0; }
+  .wf-fab { width: 36px; height: 36px; background: #1a1a1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 6px auto 2px; }
+  .wf-fab span { color: #fff; font-size: 20px; line-height: 1; }
+  .wf-toggle { display: inline-block; font-size: 10px; border: 1px solid #ddd; border-radius: 4px; padding: 3px 8px; color: #666; margin: 2px 2px 2px 0; cursor: pointer; }
+  .wf-toggle.on { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .wf-big-num { font-size: 22px; font-weight: 500; color: #1a1a1a; text-align: center; padding: 4px 0 2px; }
+  .wf-center { text-align: center; }
+  .wf-receipt { border: 1px dashed #ccc; border-radius: 8px; padding: 10px; margin-bottom: 7px; }
+  .wf-rr { display: flex; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 3px; }
+  .wf-rt { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; color: #1a1a1a; border-top: 1px solid #eee; padding-top: 5px; margin-top: 4px; }
+  .wf-arrow-row { display: flex; align-items: center; gap: 6px; }
+  .wf-person { font-size: 11px; font-weight: 500; color: #1a1a1a; }
+  .wf-arr { font-size: 11px; color: #bbb; }
+  .wf-amount { font-size: 11px; font-weight: 500; color: #1a1a1a; margin-left: auto; }
+  .wf-pay { font-size: 9px; border: 1px solid #ddd; border-radius: 3px; padding: 2px 5px; color: #666; margin-left: 6px; }
+  .wf-room-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 10px 12px; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center; }
+  .wf-badge { font-size: 9px; background: #f0f9f4; border: 1px solid #c0e8d0; color: #2a7a4a; border-radius: 3px; padding: 1px 6px; }
+  .wf-badge.done { background: #f5f5f0; border-color: #ddd; color: #aaa; }
+  .wf-input-row { display: flex; gap: 6px; margin-bottom: 7px; }
+  .wf-input { flex: 1; background: #fafafa; border: 1px solid #e8e8e8; border-radius: 6px; padding: 7px 10px; font-size: 11px; color: #aaa; }
+  .wf-icon-btn { width: 32px; height: 32px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .wf-icon-btn span { color: #fff; font-size: 16px; }
+
+  .divider { border: none; border-top: 1px solid #e8e8e8; margin: 20px 0; }
+
+  .flow-section { margin-top: 8px; }
+  .flow-title { font-size: 12px; font-weight: 500; color: #1a1a1a; margin-bottom: 8px; }
+  .flow-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .flow-step { font-size: 11px; background: #f5f5f0; border: 1px solid #e0e0e0; border-radius: 4px; padding: 4px 10px; color: #444; }
+  .flow-arrow { font-size: 11px; color: #ccc; }
+
+  .dl-btn { display: inline-flex; align-items: center; gap: 8px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 13px; cursor: pointer; margin-bottom: 28px; text-decoration: none; }
+  .dl-btn:hover { background: #333; }
+</style>
+</head>
+<body>
+
+<h1>여행 정산 앱 — 와이어프레임</h1>
+<p class="meta">총 5본 · MVP 설계 기준 · 2025.05</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(0)">1본 · 홈</div>
+  <div class="tab" onclick="show(1)">2본 · 방 개설</div>
+  <div class="tab" onclick="show(2)">3본 · 지출 목록</div>
+  <div class="tab" onclick="show(3)">4본 · 지출 추가</div>
+  <div class="tab" onclick="show(4)">5본 · 정산 결과</div>
+</div>
+
+<!-- 1본: 홈 -->
+<div class="screen active" id="s0">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+
+      <div class="wf-label">앱 타이틀</div>
+      <div class="wf-box" style="margin-bottom:14px;">
+        <div class="wf-t">✈ 여행 정산</div>
+        <div class="wf-s">간편하게 정산하고 공유하세요</div>
+      </div>
+
+      <div class="wf-label">내 방 목록</div>
+      <div class="wf-room-card">
+        <div>
+          <div class="wf-t">제주 3박 4일</div>
+          <div class="wf-s">5.10 – 5.13 · 3명</div>
+        </div>
+        <span class="wf-badge">진행중</span>
+      </div>
+      <div class="wf-room-card">
+        <div>
+          <div class="wf-t">부산 당일치기</div>
+          <div class="wf-s">4.20 · 4명</div>
+        </div>
+        <span class="wf-badge done">정산완료</span>
+      </div>
+
+      <div class="wf-divider"></div>
+
+      <div class="wf-label">링크로 방 입장</div>
+      <div class="wf-input-row">
+        <div class="wf-input">초대 링크 붙여넣기</div>
+        <div class="wf-icon-btn"><span>→</span></div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="wf-box filled wf-center"><div class="wf-t">+ 새 여행 만들기</div></div>
+      </div>
+    </div>
+    <div class="screen-num">1본 / 홈 · 방 목록</div>
+  </div>
+
+  <div class="info">
+    <h3>컴포넌트</h3>
+    <div class="comp-list">
+      <div class="comp-item"><span class="comp-tag">RoomCard</span>방 카드 (이름·날짜·인원·상태뱃지)</div>
+      <div class="comp-item"><span class="comp-tag">LinkInput</span>초대 링크 직접 입력 진입</div>
+      <div class="comp-item"><span class="comp-tag">StatusBadge</span>진행중 / 정산완료 구분</div>
+      <div class="comp-item"><span class="comp-tag">PrimaryButton</span>새 여행 만들기 → 2본</div>
+    </div>
+    <div class="note">
+      <strong>진입 경로 두 가지</strong><br>
+      A. 링크 클릭 → URL에 방 ID 포함 → 자동으로 3본(지출 목록)으로 이동<br>
+      B. 앱 직접 오픈 → localStorage에 저장된 방 목록 표시<br><br>
+      방 목록이 없는 첫 방문자는 방 만들기 버튼만 노출
+    </div>
+    <div class="flow-section" style="margin-top:14px;">
+      <div class="flow-title">화면 흐름</div>
+      <div class="flow-steps">
+        <span class="flow-step">홈</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">방 카드 탭</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">3본 지출목록</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2본: 방 개설 -->
+<div class="screen" id="s1">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <span style="font-size:16px; color:#aaa;">←</span>
+        <span class="wf-t">새 여행 만들기</span>
+      </div>
+
+      <div class="wf-label">여행 이름</div>
+      <div class="wf-box muted" style="margin-bottom:10px;">
+        <div class="wf-s">ex) 제주 3박 4일</div>
+      </div>
+
+      <div class="wf-label">여행 날짜</div>
+      <div class="wf-row" style="margin-bottom:10px;">
+        <div class="wf-box muted"><div class="wf-s">시작일</div></div>
+        <div class="wf-box muted"><div class="wf-s">종료일</div></div>
+      </div>
+
+      <div class="wf-label">인원 추가</div>
+      <div class="wf-box" style="margin-bottom:10px;">
+        <div class="wf-box muted" style="margin-bottom:6px;"><div class="wf-s">이름 입력 후 엔터</div></div>
+        <div>
+          <span class="wf-tag">제제 ✕</span>
+          <span class="wf-tag">민지 ✕</span>
+          <span class="wf-tag">수현 ✕</span>
+          <span class="wf-tag add">+ 추가</span>
+        </div>
+      </div>
+
+      <div class="wf-box filled wf-center" style="margin-top:12px;">
+        <div class="wf-t">방 만들기 →</div>
+      </div>
+    </div>
+    <div class="screen-num">2본 / 방 개설</div>
+  </div>
+
+  <div class="info">
+    <h3>컴포넌트</h3>
+    <div class="comp-list">
+      <div class="comp-item"><span class="comp-tag">TextInput</span>여행 이름</div>
+      <div class="comp-item"><span class="comp-tag">DateRangePicker</span>날짜 선택</div>
+      <div class="comp-item"><span class="comp-tag">TagInput</span>인원 추가 / 삭제</div>
+      <div class="comp-item"><span class="comp-tag">PrimaryButton</span>방 만들기</div>
+    </div>
+    <div class="note">
+      <strong>방 만들기 버튼 탭 시</strong><br>
+      Firebase에 room document 생성 →<br>
+      고유 ID 포함된 초대 링크 자동 생성 →<br>
+      링크 복사 + 카톡 공유 버튼 노출 →<br>
+      3본(지출 목록)으로 이동
+    </div>
+    <div class="flow-section" style="margin-top:14px;">
+      <div class="flow-title">화면 흐름</div>
+      <div class="flow-steps">
+        <span class="flow-step">방 개설</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">링크 공유 모달</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">3본 지출목록</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3본: 지출 목록 -->
+<div class="screen" id="s2">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+
+      <div class="wf-box" style="margin-bottom:10px;">
+        <div class="wf-t">제주 3박 4일</div>
+        <div class="wf-s">5.10 – 5.13 · 3명</div>
+      </div>
+
+      <div class="wf-row" style="margin-bottom:10px;">
+        <div class="wf-box wf-center">
+          <div class="wf-s">총 지출</div>
+          <div class="wf-big-num">387,000</div>
+          <div class="wf-s">원</div>
+        </div>
+        <div class="wf-box wf-center">
+          <div class="wf-s">1인 평균</div>
+          <div class="wf-big-num">129,000</div>
+          <div class="wf-s">원</div>
+        </div>
+      </div>
+
+      <div class="wf-label">지출 내역</div>
+      <div class="wf-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><div class="wf-t">흑돼지</div><div class="wf-s">결제 제제 · 전원</div></div>
+          <div class="wf-t">85,000</div>
+        </div>
+      </div>
+      <div class="wf-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><div class="wf-t">렌터카</div><div class="wf-s">결제 민지 · 전원</div></div>
+          <div class="wf-t">120,000</div>
+        </div>
+      </div>
+      <div class="wf-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><div class="wf-t">카페</div><div class="wf-s">결제 수현 · 제제, 수현</div></div>
+          <div class="wf-t">16,000</div>
+        </div>
+      </div>
+
+      <div class="wf-fab"><span>+</span></div>
+
+      <div class="wf-box filled wf-center" style="margin-top:8px;">
+        <div class="wf-t">정산하기 →</div>
+      </div>
+    </div>
+    <div class="screen-num">3본 / 지출 목록 (메인)</div>
+  </div>
+
+  <div class="info">
+    <h3>컴포넌트</h3>
+    <div class="comp-list">
+      <div class="comp-item"><span class="comp-tag">TripHeader</span>여행 이름 · 날짜 · 인원</div>
+      <div class="comp-item"><span class="comp-tag">StatRow</span>총 지출 / 1인 평균</div>
+      <div class="comp-item"><span class="comp-tag">ExpenseCard</span>항목명 · 결제자 · 금액 · 참여인원</div>
+      <div class="comp-item"><span class="comp-tag">FAB</span>지출 추가 플로팅 버튼 → 4본</div>
+      <div class="comp-item"><span class="comp-tag">PrimaryButton</span>정산하기 → 5본</div>
+    </div>
+    <div class="note">
+      <strong>실시간 동기화</strong><br>
+      Firebase Realtime DB 구독 → 친구가 지출 추가하면 즉시 리스트 업데이트. 지출 카드 길게 누르면 삭제 가능.
+    </div>
+    <div class="flow-section" style="margin-top:14px;">
+      <div class="flow-title">화면 흐름</div>
+      <div class="flow-steps">
+        <span class="flow-step">FAB 탭</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">4본 바텀시트</span>
+      </div>
+      <div class="flow-steps" style="margin-top:6px;">
+        <span class="flow-step">정산하기 탭</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">5본 결과</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4본: 지출 추가 -->
+<div class="screen" id="s3">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <span class="wf-t">지출 추가</span>
+        <span style="font-size:16px; color:#aaa;">✕</span>
+      </div>
+
+      <div class="wf-label">항목명</div>
+      <div class="wf-box muted" style="margin-bottom:10px;">
+        <div class="wf-s">ex) 흑돼지, 렌터카, 숙소</div>
+      </div>
+
+      <div class="wf-label">결제한 사람</div>
+      <div style="margin-bottom:10px;">
+        <span class="wf-toggle on">제제</span>
+        <span class="wf-toggle">민지</span>
+        <span class="wf-toggle">수현</span>
+      </div>
+
+      <div class="wf-label">금액</div>
+      <div class="wf-box wf-center" style="margin-bottom:10px;">
+        <div style="font-size:24px; font-weight:500; padding:4px 0;">85,000</div>
+        <div class="wf-s">원</div>
+      </div>
+
+      <div class="wf-label">참여 인원</div>
+      <div class="wf-box" style="margin-bottom:12px;">
+        <div class="wf-s" style="margin-bottom:6px;">함께 나눌 인원을 선택하세요</div>
+        <div>
+          <span class="wf-toggle on">제제</span>
+          <span class="wf-toggle on">민지</span>
+          <span class="wf-toggle on">수현</span>
+          <span class="wf-toggle" style="font-size:9px; color:#aaa;">전체선택</span>
+        </div>
+        <div class="wf-divider"></div>
+        <div class="wf-s">1인 28,333원</div>
+      </div>
+
+      <div class="wf-box filled wf-center">
+        <div class="wf-t">추가하기 →</div>
+      </div>
+    </div>
+    <div class="screen-num">4본 / 지출 추가 (바텀시트)</div>
+  </div>
+
+  <div class="info">
+    <h3>컴포넌트</h3>
+    <div class="comp-list">
+      <div class="comp-item"><span class="comp-tag">TextInput</span>항목명</div>
+      <div class="comp-item"><span class="comp-tag">SingleSelect</span>결제자 선택 (1명만)</div>
+      <div class="comp-item"><span class="comp-tag">NumberInput</span>금액 입력 (숫자 키패드)</div>
+      <div class="comp-item"><span class="comp-tag">MultiToggle</span>참여 인원 다중 선택</div>
+      <div class="comp-item"><span class="comp-tag">SplitPreview</span>1인 금액 실시간 계산</div>
+    </div>
+    <div class="note">
+      <strong>바텀시트로 동작</strong><br>
+      3본 위에 올라오는 방식. 참여 인원 토글 바뀔 때마다 1인 금액 즉시 업데이트. 기본값은 전체 선택.
+    </div>
+    <div class="flow-section" style="margin-top:14px;">
+      <div class="flow-title">화면 흐름</div>
+      <div class="flow-steps">
+        <span class="flow-step">추가하기</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Firebase 저장</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">3본으로 복귀</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5본: 정산 결과 -->
+<div class="screen" id="s4">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>●●●</span></div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <span style="font-size:16px; color:#aaa;">←</span>
+        <span class="wf-t">정산 결과</span>
+      </div>
+
+      <div class="wf-label">정산 내역</div>
+      <div class="wf-box" style="margin-bottom:6px;">
+        <div class="wf-arrow-row">
+          <span class="wf-person">제제</span>
+          <span class="wf-arr">→</span>
+          <span class="wf-person">민지</span>
+          <span class="wf-amount">13,000원</span>
+          <span class="wf-pay">토스</span>
+          <span class="wf-pay">카카오</span>
+        </div>
+      </div>
+      <div class="wf-box" style="margin-bottom:12px;">
+        <div class="wf-arrow-row">
+          <span class="wf-person">수현</span>
+          <span class="wf-arr">→</span>
+          <span class="wf-person">민지</span>
+          <span class="wf-amount">26,000원</span>
+          <span class="wf-pay">토스</span>
+          <span class="wf-pay">카카오</span>
+        </div>
+      </div>
+
+      <div class="wf-label">공유 카드 미리보기</div>
+      <div class="wf-receipt">
+        <div class="wf-center" style="margin-bottom:8px;">
+          <div class="wf-t" style="font-size:13px;">제주 3박 4일</div>
+          <div class="wf-s">2025.05.10 – 05.13 · 3명</div>
+        </div>
+        <div class="wf-divider"></div>
+        <div class="wf-rr"><span>흑돼지</span><span>85,000</span></div>
+        <div class="wf-rr"><span>렌터카</span><span>120,000</span></div>
+        <div class="wf-rr"><span>카페</span><span>16,000</span></div>
+        <div class="wf-rt"><span>총 지출</span><span>387,000원</span></div>
+        <div class="wf-rt" style="font-size:10px; margin-top:2px;"><span>1인 평균</span><span>129,000원</span></div>
+      </div>
+
+      <div class="wf-row">
+        <div class="wf-box wf-center"><div class="wf-s">이미지 저장</div></div>
+        <div class="wf-box filled wf-center"><div class="wf-t">공유하기</div></div>
+      </div>
+
+      <hr class="wf-divider" style="margin: 8px 0;">
+
+      <div style="background:transparent;border:1px solid #e0e0e0;border-radius:8px;padding:8px 10px;text-align:center;">
+        <div style="font-size:11px;color:#aaa;">정산 완료로 표시하기</div>
+      </div>
+    </div>
+    <div class="screen-num">5본 / 정산 결과</div>
+  </div>
+
+  <div class="info">
+    <h3>컴포넌트</h3>
+    <div class="comp-list">
+      <div class="comp-item"><span class="comp-tag">SettleList</span>정산 내역 (최소 송금 횟수)</div>
+      <div class="comp-item"><span class="comp-tag">DeepLinkBtn</span>토스·카카오페이 앱 연결</div>
+      <div class="comp-item"><span class="comp-tag">ReceiptCard</span>영수증 카드 미리보기</div>
+      <div class="comp-item"><span class="comp-tag">SaveButton</span>이미지 저장 (html2canvas)</div>
+      <div class="comp-item"><span class="comp-tag">ShareButton</span>Web Share API 공유</div>
+      <div class="comp-item"><span class="comp-tag">CompleteButton</span>정산 완료로 표시하기 ← 신규</div>
+    </div>
+    <div class="note">
+      <strong>토스 / 카카오 버튼</strong><br>
+      결제 API 아님. 딥링크로 해당 앱 열기.<br>
+      supertoss://send?amount=13000 형태.<br><br>
+      <strong>공유하기 동작</strong><br>
+      html2canvas로 카드 이미지 변환 → Web Share API 호출 → 카톡·인스타·문자 공유 시트. PC는 이미지 다운로드 대체.<br><br>
+      <strong>정산 완료로 표시하기</strong><br>
+      탭 → 확인 다이얼로그 → Firebase room.status = "done" 업데이트 → 1본 홈으로 이동. 버튼을 아웃라인 + 하단 배치로 약하게 처리해 실수 탭 방지.
+    </div>
+    <div class="flow-section" style="margin-top:14px;">
+      <div class="flow-title">정산 알고리즘</div>
+      <div class="flow-steps">
+        <span class="flow-step">실제 부담금 계산</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">차액 산출</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">그리디 최소화</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(idx) {
+  document.querySelectorAll('.screen').forEach((s, i) => s.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>

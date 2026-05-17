@@ -1,0 +1,297 @@
+@use '../../styles/variables' as *;
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 54px;
+  padding-bottom: 36px;
+  background: $card;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── 헤더 ──────────────────────────────────────────────────
+.header {
+  padding: 12px $screen-px 22px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brandLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandDot {
+  width: 10px;
+  height: 10px;
+  background: $accent;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.brandName {
+  font-family: $font-mono;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+.menuBtn {
+  padding: 4px;
+}
+
+.titleBlock {
+  margin-top: 28px;
+}
+
+.title {
+  font-size: 36px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: $mute;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.subtitleBold {
+  color: $ink;
+  font-weight: 600;
+}
+
+// ─── 방 목록 ────────────────────────────────────────────────
+.roomList {
+  padding: 0 $screen-px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.listHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid $ink;
+  gap: 12px;
+}
+
+.listCount {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.roomItem {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 18px 0;
+  cursor: pointer;
+  display: block;
+  border-bottom: 1px solid $line;
+  font-family: inherit;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.roomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.roomLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.roomNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  background: $accent;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.roomName {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roomMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.roomDate {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.metaDot {
+  width: 2px;
+  height: 2px;
+  background: $mute;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusActive {
+  font-size: 11px;
+  color: $accent;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusDone {
+  font-size: 11px;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.roomRight {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.memberCount {
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.memberLabel {
+  font-family: $font-mono;
+  font-size: 10px;
+  color: $mute;
+  margin-top: 2px;
+}
+
+.empty {
+  padding: 60px 0;
+  text-align: center;
+  color: $mute;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+// ─── 하단 영역 ──────────────────────────────────────────────
+.bottom {
+  padding: 14px $screen-px 0;
+  border-top: 1px solid $line;
+  background: $card;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.linkInput {
+  flex: 1;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $ink;
+  font-size: 14px;
+  font-family: inherit;
+  color: $ink;
+
+  &::placeholder {
+    color: $mute;
+  }
+}
+
+.linkError {
+  font-size: 12px;
+  color: $accent;
+  margin-bottom: 8px;
+}
+
+.linkBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid $ink;
+  transition: background 0.15s;
+
+  &.hasInput {
+    background: $ink;
+  }
+
+  &.noInput {
+    background: $card;
+  }
+}
+
+.ctaBtn {
+  width: 100%;
+  padding: 20px 18px;
+  background: $ink;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
+  white-space: nowrap;
+  margin-top: 14px;
+}
+
+.ctaRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ctaTag {
+  font-family: $font-mono;
+  font-size: 12px;
+  opacity: 0.6;
+  font-weight: 500;
+}

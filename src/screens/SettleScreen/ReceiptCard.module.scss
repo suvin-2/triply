@@ -1,0 +1,197 @@
+@use '../../styles/variables' as *;
+
+.card {
+  background: #fff;
+  width: 100%;
+}
+
+// 상단 톱니 — 반원을 반복 배치하여 절취선 효과
+.serratedTop {
+  height: 14px;
+  background: radial-gradient(circle at 10px 0, $bg 9px, #fff 9px);
+  background-size: 20px 14px;
+  background-repeat: repeat-x;
+}
+
+// 하단 톱니
+.serratedBottom {
+  height: 14px;
+  background: radial-gradient(circle at 10px 14px, $bg 9px, #fff 9px);
+  background-size: 20px 14px;
+  background-repeat: repeat-x;
+}
+
+.body {
+  padding: 16px 22px 22px;
+}
+
+// ─── 헤더 ────────────────────────────────────────────────────────
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.brand {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: $ink;
+}
+
+.dateLabel {
+  font-size: 10px;
+  color: $mute;
+  letter-spacing: 0.06em;
+}
+
+// ─── 여행 이름 ────────────────────────────────────────────────────
+.tripTitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.memberLine {
+  font-size: 10px;
+  color: $mute;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+
+// ─── 구분선 ──────────────────────────────────────────────────────
+.divider {
+  height: 1px;
+  background: $ink;
+  margin: 14px 0;
+}
+
+.dividerDash {
+  height: 1px;
+  border: none;
+  border-top: 1px dashed $line;
+  margin: 14px 0;
+}
+
+// ─── 섹션 레이블 ──────────────────────────────────────────────────
+.sectionLabel {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: $mute;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+// ─── 지출 항목 ────────────────────────────────────────────────────
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.itemLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.itemTitle {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemPayer {
+  font-size: 10px;
+  color: $mute;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.itemAmount {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ─── 합계 ────────────────────────────────────────────────────────
+.totalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.totalLabel {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: $mute;
+  font-weight: 600;
+}
+
+.totalAmount {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+// ─── 정산 내역 ────────────────────────────────────────────────────
+.settleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.settleName {
+  font-size: 12px;
+  color: $ink;
+}
+
+.settleAmount {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// ─── 바코드 ──────────────────────────────────────────────────────
+.barcodeWrap {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.barcode {
+  display: flex;
+  align-items: stretch;
+  height: 42px;
+  gap: 2px;
+}
+
+.bar {
+  background: $ink;
+  flex-shrink: 0;
+  min-width: 1px;
+}
+
+.barcodeNum {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: $mute;
+}

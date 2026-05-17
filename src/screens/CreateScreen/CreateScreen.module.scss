@@ -1,0 +1,313 @@
+@use '../../styles/variables' as *;
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 54px;
+  padding-bottom: 36px;
+  background: $card;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── 헤더 ──────────────────────────────────────────────────
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 18px;
+}
+
+.backBtn {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.stepLabel {
+  font-family: $font-mono;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $mute;
+}
+
+.titleBlock {
+  padding: 4px $screen-px 24px;
+}
+
+.title {
+  font-size: 30px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.titleMuted {
+  font-weight: 300;
+  color: $mute;
+}
+
+// ─── 폼 영역 ────────────────────────────────────────────────
+.form {
+  padding: 0 $screen-px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.fieldGroup {
+  padding-bottom: 22px;
+  border-bottom: 1px solid $line;
+  margin-bottom: 22px;
+}
+
+.fieldLabel {
+  font-family: $font-mono;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $mute;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $ink;
+  font-size: 16px;
+  font-family: inherit;
+  color: $ink;
+  font-weight: 500;
+
+  &::placeholder {
+    color: $mute;
+    font-weight: 400;
+  }
+}
+
+// ─── 날짜 입력 ──────────────────────────────────────────────
+.dateRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.dateSep {
+  color: $mute;
+  font-size: 13px;
+  text-align: center;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $ink;
+  font-size: 15px;
+  font-family: $font-mono;
+  color: $ink;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+
+  // 달력 아이콘 색상 통일
+  &::-webkit-calendar-picker-indicator {
+    opacity: 0.4;
+    cursor: pointer;
+  }
+
+  // 날짜 미선택 시 hint 텍스트를 muted 색상으로
+  &:not([value]),
+  &[value=''] {
+    color: $mute;
+  }
+}
+
+.dateError {
+  font-size: 12px;
+  color: $accent;
+  margin-top: 8px;
+}
+
+// ─── 인원 입력 ──────────────────────────────────────────────
+.memberChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 12px;
+  background: $ink;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: $radius;
+}
+
+.chipRemove {
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.memberInputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.memberInput {
+  flex: 1;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $ink;
+  font-size: 16px;
+  font-family: inherit;
+  color: $ink;
+  font-weight: 500;
+
+  &::placeholder {
+    color: $mute;
+    font-weight: 400;
+  }
+}
+
+.addBtn {
+  padding: 14px 16px;
+  background: $card;
+  border: 1px solid $ink;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: $radius;
+  color: $ink;
+  white-space: nowrap;
+}
+
+.formBottom {
+  height: 20px;
+}
+
+// ─── 하단 CTA ───────────────────────────────────────────────
+.bottom {
+  padding: 14px $screen-px 0;
+  border-top: 1px solid $line;
+}
+
+// ─── 성공 오버레이 ───────────────────────────────────────────
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 10;
+}
+
+.overlaySheet {
+  width: 100%;
+  background: $card;
+  border-top-left-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  padding: 24px $screen-px 40px;
+  border-top: 1px solid $ink;
+}
+
+.overlayHandle {
+  width: 40px;
+  height: 4px;
+  background: #d6d0c2;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.overlayTitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.overlayDesc {
+  font-size: 13px;
+  color: $mute;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.linkBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid $line;
+  border-radius: $radius;
+  margin-bottom: 12px;
+}
+
+.linkText {
+  flex: 1;
+  font-family: $font-mono;
+  font-size: 12px;
+  color: $mute;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copyBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: $accent;
+  white-space: nowrap;
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.copyDone {
+  color: $mute;
+}
+
+.startBtn {
+  width: 100%;
+  padding: 20px 18px;
+  background: $ink;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
+  white-space: nowrap;
+}

@@ -1,0 +1,438 @@
+@use '../../styles/variables' as *;
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 54px;
+  padding-bottom: 36px;
+  background: $card;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── 로딩 / 에러 ────────────────────────────────────────────
+.center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  padding: $screen-px;
+  text-align: center;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: $mute;
+}
+
+.errorText {
+  font-size: 15px;
+  color: $ink;
+  font-weight: 600;
+}
+
+.errorSub {
+  font-size: 13px;
+  color: $mute;
+  margin-top: 4px;
+}
+
+// ─── 상단 바 ────────────────────────────────────────────────
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 12px;
+}
+
+.backBtn {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.liveChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  background: $accent;
+  border-radius: 50%;
+}
+
+.liveLabel {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $mute;
+  letter-spacing: 0.1em;
+}
+
+.menuBtn {
+  padding: 4px;
+}
+
+// ─── 히어로 ─────────────────────────────────────────────────
+.hero {
+  padding: 6px $screen-px 18px;
+}
+
+.tripName {
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.tripMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.tripDate {
+  font-family: $font-mono;
+  font-size: 12px;
+  color: $mute;
+}
+
+.metaDot {
+  width: 2px;
+  height: 2px;
+  background: $mute;
+  border-radius: 50%;
+}
+
+// ─── 통계 그리드 ─────────────────────────────────────────────
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid $ink;
+  margin-top: 22px;
+}
+
+.statCell {
+  padding: 16px 0;
+
+  &:first-child {
+    padding-right: 14px;
+    border-right: 1px solid $line;
+  }
+
+  &:last-child {
+    padding-left: 14px;
+  }
+}
+
+.statLabel {
+  font-family: $font-mono;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $mute;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.statNumber {
+  font-family: $font-mono;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.statSub {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: $mute;
+  margin-top: 2px;
+}
+
+// ─── 카테고리 필터 ───────────────────────────────────────────
+.filters {
+  display: flex;
+  gap: 6px;
+  padding: 0 $screen-px 14px;
+  overflow-x: auto;
+  border-bottom: 1px solid $line;
+}
+
+.filterChip {
+  padding: 7px 12px;
+  border-radius: $radius;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+
+  &.active {
+    background: $ink;
+    color: #fff;
+    border: 1px solid $ink;
+  }
+
+  &.inactive {
+    background: transparent;
+    color: $ink;
+    border: 1px solid $line;
+  }
+}
+
+// ─── 지출 목록 ──────────────────────────────────────────────
+.expenseList {
+  flex: 1;
+  overflow-y: auto;
+  // FAB 높이(60px) + gap(8px) + 여백(36px) 만큼 하단 패딩
+  padding: 4px $screen-px 120px;
+}
+
+.emptyList {
+  padding: 60px 0;
+  text-align: center;
+  color: $mute;
+  font-size: 13px;
+}
+
+.expenseItem {
+  padding: 16px 0;
+  border-bottom: 1px solid $line;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.expenseMeta {
+  width: 38px;
+  flex-shrink: 0;
+}
+
+.expenseCategory {
+  font-family: $font-mono;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.expenseDate {
+  font-family: $font-mono;
+  font-size: 10px;
+  color: $mute;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.expenseBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.expenseTitle {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expensePayer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.payerName {
+  font-size: 11px;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.payerDot {
+  width: 2px;
+  height: 2px;
+  background: $mute;
+  border-radius: 50%;
+}
+
+.splitCount {
+  font-size: 11px;
+  color: $mute;
+  white-space: nowrap;
+}
+
+.expenseAmount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.amountTotal {
+  font-family: $font-mono;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.amountPer {
+  font-family: $font-mono;
+  font-size: 10px;
+  color: $mute;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+// ─── FAB + 정산 버튼 바 ──────────────────────────────────────
+.fabBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 36px;
+  display: flex;
+  gap: 8px;
+  padding: 0 $screen-px;
+}
+
+.fab {
+  width: 60px;
+  height: 60px;
+  background: $accent;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.settleBtn {
+  flex: 1;
+  height: 60px;
+  background: $ink;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  white-space: nowrap;
+}
+
+.settleMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settleMemberCount {
+  font-family: $font-mono;
+  font-size: 12px;
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+// ─── 이름 입력 모달 ──────────────────────────────────────────
+.nameOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+.nameSheet {
+  width: 100%;
+  background: $card;
+  border-top-left-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  padding: 14px $screen-px 48px;
+  border-top: 1px solid $ink;
+}
+
+.nameHandle {
+  width: 40px;
+  height: 4px;
+  background: #d6d0c2;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.nameTitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.nameDesc {
+  font-size: 13px;
+  color: $mute;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.nameInput {
+  width: 100%;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $ink;
+  font-size: 18px;
+  font-family: inherit;
+  color: $ink;
+  font-weight: 600;
+  margin-bottom: 20px;
+
+  &::placeholder {
+    color: $mute;
+    font-weight: 400;
+  }
+}
+
+.nameConfirmBtn {
+  width: 100%;
+  padding: 18px;
+  background: $ink;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+
+  &:disabled {
+    background: #bfbaa8;
+    cursor: not-allowed;
+  }
+}

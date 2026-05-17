@@ -1,0 +1,401 @@
+@use '../../styles/variables' as *;
+
+.screen {
+  position: absolute;
+  inset: 0;
+  padding-top: 54px;
+  background: $card;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── 로딩 / 에러 ─────────────────────────────────────────────────
+.center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: $mute;
+}
+
+.errorText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+// ─── 상단 바 ──────────────────────────────────────────────────────
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 12px;
+}
+
+.backBtn {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.topTitle {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+// ─── 히어로 ──────────────────────────────────────────────────────
+.hero {
+  padding: 6px $screen-px 18px;
+  border-bottom: 1px solid $ink;
+}
+
+.tripName {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 6px;
+}
+
+.heroMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heroLabel {
+  font-size: 12px;
+  color: $mute;
+}
+
+.heroAmount {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.heroMember {
+  font-size: 12px;
+  color: $mute;
+}
+
+// ─── 탭 ──────────────────────────────────────────────────────────
+.tabs {
+  display: flex;
+  border-bottom: 1px solid $line;
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 14px 0;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: color 0.12s, border-color 0.12s;
+
+  &.active {
+    color: $ink;
+    border-bottom-color: $ink;
+  }
+
+  &.inactive {
+    color: $mute;
+    border-bottom-color: transparent;
+  }
+}
+
+// ─── 탭 콘텐츠 ────────────────────────────────────────────────────
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  // 하단 버튼 높이만큼 여백 (bottomBar: absolute, 36px + 버튼 52px + 간격)
+  padding-bottom: 100px;
+}
+
+// ─── 송금 내역 탭 ─────────────────────────────────────────────────
+.transferList {
+  padding: 4px $screen-px 0;
+}
+
+.emptyTransfers {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.emptySub {
+  font-size: 13px;
+  color: $mute;
+}
+
+.transferRow {
+  padding: 18px 0;
+  border-bottom: 1px solid $line;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.transferInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.transferParties {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fromName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.arrow {
+  font-size: 13px;
+  color: $mute;
+}
+
+.toName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.transferAmount {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.deepLinks {
+  display: flex;
+  gap: 8px;
+}
+
+.tossBtn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: $radius;
+  border: 1px solid $line;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $ink;
+  transition: background 0.1s;
+
+  &:active {
+    background: $line;
+  }
+}
+
+.kakaoBtn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: $radius;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: #FEE500;
+  color: #1A1400;
+  transition: opacity 0.1s;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+// ─── 영수증 카드 탭 ────────────────────────────────────────────────
+.receiptWrap {
+  padding: 24px $screen-px;
+  background: $bg;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+// 스토리 미리보기: 검정 배경 + 카드 -2deg 회전
+.storyPreview {
+  width: 100%;
+  background: #0A0A0A;
+  border-radius: $radius;
+  padding: 28px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardRotated {
+  transform: rotate(-2deg);
+  width: 100%;
+}
+
+// 공유 버튼 (STEP 10에서 기능 연결)
+.shareActions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.saveBtn {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: $radius;
+  border: 1px solid $ink;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $ink;
+  transition: background 0.1s;
+
+  &:active {
+    background: $line;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.shareBtn {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: $radius;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: $ink;
+  color: #fff;
+  transition: opacity 0.1s;
+
+  &:active {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ─── 하단 정산 완료 버튼 ──────────────────────────────────────────
+.bottomBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 36px;
+  padding: 0 $screen-px;
+}
+
+.doneBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: $radius;
+  border: 1px solid $line;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $mute;
+  transition: opacity 0.12s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ─── 확인 다이얼로그 ──────────────────────────────────────────────
+.dialogOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: $screen-px;
+}
+
+.dialog {
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 28px 24px 24px;
+  width: 100%;
+}
+
+.dialogTitle {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.dialogDesc {
+  font-size: 13px;
+  color: $mute;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.dialogBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.dialogCancel {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: $radius;
+  border: 1px solid $line;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $ink;
+}
+
+.dialogConfirm {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: $radius;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: $ink;
+  color: #fff;
+}

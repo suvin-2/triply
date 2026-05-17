@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Triply — App Icon</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: #F4F1EA;
+    color: #0A0A0A;
+    min-height: 100vh;
+    padding: 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  h1 {
+    font-size: 32px; font-weight: 700; letter-spacing: -0.025em;
+    margin-bottom: 8px;
+  }
+  .sub {
+    font-size: 13px; color: #8C8579; margin-bottom: 48px;
+    letter-spacing: 0.02em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 48px;
+    align-items: end;
+    margin-bottom: 56px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid #D6D0C2;
+  }
+  .item { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+  .item .label {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #8C8579; font-weight: 500;
+  }
+  .item .label strong { color: #0A0A0A; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-right: 6px; }
+
+  .icon {
+    display: block;
+  }
+  .icon img { display: block; }
+
+  /* Native iOS home screen-like mock */
+  .home {
+    margin-top: 40px;
+    background: linear-gradient(180deg, #d4cfc1, #e9e4d6);
+    border-radius: 32px;
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 24px;
+    width: 580px;
+  }
+  .home .app { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .home .app .badge {
+    width: 120px; height: 120px; border-radius: 27px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 38px;
+    letter-spacing: -0.02em;
+  }
+  .home .app .name { font-size: 12px; color: #1a1a1a; font-weight: 500; }
+  .toss { background: #0064FF; }
+  .kakao { background: #FEE500; color: #3C1E1E; }
+  .baemin { background: #2AC1BC; }
+  .triply-mock img { width: 120px; height: 120px; border-radius: 27px; display: block; }
+
+  .specs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    margin-top: 48px;
+    max-width: 800px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .specs h3 {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #8C8579; font-weight: 500; margin-bottom: 8px;
+  }
+  .specs .row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px solid #ECE7DB;
+  }
+  .specs .row .v { font-family: 'JetBrains Mono', monospace; color: #0A0A0A; }
+  .swatch {
+    display: inline-block; width: 14px; height: 14px;
+    border: 1px solid rgba(0,0,0,0.15);
+    vertical-align: middle; margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+  <h1>Triply <span style="font-weight:300; color:#8C8579;">— App Icon</span></h1>
+  <div class="sub">1024 × 1024 SVG · 다중 크기 미리보기</div>
+
+  <div class="grid">
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="240" height="240" alt="Triply icon 240"/></div>
+      <div class="label"><strong>240</strong>iPad / iOS large</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="180" height="180" alt="Triply icon 180"/></div>
+      <div class="label"><strong>180</strong>iPhone home</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="120" height="120" alt="Triply icon 120"/></div>
+      <div class="label"><strong>120</strong>Notification</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="76" height="76" alt="Triply icon 76"/></div>
+      <div class="label"><strong>76</strong>Spotlight</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="60" height="60" alt="Triply icon 60"/></div>
+      <div class="label"><strong>60</strong>Settings</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="40" height="40" alt="Triply icon 40"/></div>
+      <div class="label"><strong>40</strong>Small</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="29" height="29" alt="Triply icon 29"/></div>
+      <div class="label"><strong>29</strong>Tiny</div>
+    </div>
+    <div class="item">
+      <div class="icon"><img src="triply-icon.svg" width="20" height="20" alt="Triply icon 20"/></div>
+      <div class="label"><strong>20</strong>Min</div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8C8579; font-weight: 500; margin-bottom: 16px;">홈 화면에서</h3>
+  <div class="home">
+    <div class="app">
+      <div class="badge triply-mock"><img src="triply-icon.svg" alt="Triply"/></div>
+      <span class="name">Triply</span>
+    </div>
+    <div class="app">
+      <div class="badge toss">toss</div>
+      <span class="name">토스</span>
+    </div>
+    <div class="app">
+      <div class="badge kakao">pay</div>
+      <span class="name">카카오페이</span>
+    </div>
+    <div class="app">
+      <div class="badge baemin">배민</div>
+      <span class="name">배달의민족</span>
+    </div>
+  </div>
+
+  <div class="specs">
+    <div>
+      <h3>색상</h3>
+      <div class="row"><span><span class="swatch" style="background:#EDE8DF;"></span>Cream Beige</span><span class="v">#EDE8DF</span></div>
+      <div class="row"><span><span class="swatch" style="background:#1A1A1A;"></span>Ink Black</span><span class="v">#1A1A1A</span></div>
+      <div class="row"><span><span class="swatch" style="background:#E8432D;"></span>Coral Red</span><span class="v">#E8432D</span></div>
+    </div>
+    <div>
+      <h3>지오메트리 (1024 기준)</h3>
+      <div class="row"><span>캔버스 모서리</span><span class="v">rx 229</span></div>
+      <div class="row"><span>영수증 영역</span><span class="v">174 → 850 × 102 → 908</span></div>
+      <div class="row"><span>톱니 (26개)</span><span class="v">26w × 18d</span></div>
+      <div class="row"><span>T 폰트</span><span class="v">Georgia 700 · 451</span></div>
+      <div class="row"><span>코랄 도트</span><span class="v">r 61 @ (644, 365)</span></div>
+    </div>
+  </div>
+</body>
+</html>
