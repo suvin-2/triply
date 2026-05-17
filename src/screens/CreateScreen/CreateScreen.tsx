@@ -55,6 +55,7 @@ export default function CreateScreen() {
       // Firebase push로 고유 roomId 생성
       const roomRef = push(ref(db, 'rooms'));
       const roomId = roomRef.key!;
+      const ownerToken = crypto.randomUUID();
       const fbStart = toFirebaseDate(startDate);
       // endDate가 비어 있으면 startDate로 채워 당일치기로 처리
       const fbEnd = endDate ? toFirebaseDate(endDate) : fbStart;
@@ -65,7 +66,10 @@ export default function CreateScreen() {
         members,
         status: 'active',
         createdAt: Date.now(),
+        ownerToken,
       });
+      // 방장 토큰을 이 기기에 저장 — 삭제 권한 확인에 사용
+      localStorage.setItem(`triply_owner_${roomId}`, ownerToken);
       addRoomId(roomId);
       setCreatedId(roomId);
     } catch (err) {

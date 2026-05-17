@@ -22,6 +22,7 @@ export interface Room {
   members: string[];
   status: RoomStatus;
   createdAt: number;
+  ownerToken?: string;
 }
 
 // TripScreen / SettleScreen용
