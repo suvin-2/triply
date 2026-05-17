@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../lib/firebase';
+import { useLocalRooms } from './useLocalRooms';
+import { useHiddenRooms } from './useHiddenRooms';
 import type { Expense, RoomWithExpenses } from '../types';
 
 /**
@@ -19,6 +21,9 @@ export function useRoom(roomId: string) {
   // 현재 room/error가 어떤 roomId 기준으로 세팅됐는지 추적
   const [dataRoomId, setDataRoomId] = useState('');
 
+  const { removeRoomId } = useLocalRooms();
+  const { removeFromHidden } = useHiddenRooms();
+
   // roomId가 바뀌는 순간 자동으로 true가 되므로 effect 내 동기 setState 불필요
   const loading = dataRoomId !== roomId;
 
@@ -31,6 +36,9 @@ export function useRoom(roomId: string) {
       roomRef,
       (snapshot) => {
         if (!snapshot.exists()) {
+          // 방장이 삭제한 방 — localStorage와 숨김 목록에서 자동 정리
+          removeRoomId(roomId);
+          removeFromHidden(roomId);
           setError('존재하지 않는 방이에요.');
           setRoom(null);
           setDataRoomId(roomId);

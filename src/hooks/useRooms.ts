@@ -8,13 +8,16 @@ import type { Room } from '../types';
  * 홈 화면에서 expenses 없이 방 목록만 표시할 때 사용한다.
  *
  * roomIds 배열이 바뀌면 기존 구독을 모두 해제하고 새로 구독한다.
- * 존재하지 않는 roomId는 결과에서 제외한다.
+ * 존재하지 않는 roomId는 결과에서 제외하고, confirmedMissingIds에 포함한다.
  *
  * @param roomIds - 구독할 방 ID 목록 (localStorage에서 로드)
- * @returns Room 배열 (createdAt 내림차순)
+ * @returns rooms(Room 배열, createdAt 내림차순), confirmedMissingIds(Firebase가 없다고 확인한 ID Set)
  */
-export function useRooms(roomIds: string[]): Room[] {
+export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingIds: Set<string> } {
   const [rooms, setRooms] = useState<Record<string, Room>>({});
+  // Firebase가 snapshot.exists() === false 로 응답한 ID만 여기에 담음
+  // 로딩 중(아직 응답 없음)과 확실히 없는 것을 구분하기 위해 분리
+  const [confirmedMissingIds, setConfirmedMissingIds] = useState<Set<string>>(new Set());
 
   // join으로 비교 — Firebase key는 쉼표를 포함하지 않으므로 안전
   const key = roomIds.join(',');
@@ -22,6 +25,7 @@ export function useRooms(roomIds: string[]): Room[] {
   useEffect(() => {
     if (roomIds.length === 0) {
       setRooms({});
+      setConfirmedMissingIds(new Set());
       return;
     }
 
@@ -34,7 +38,8 @@ export function useRooms(roomIds: string[]): Room[] {
         roomRef,
         (snapshot) => {
           if (!snapshot.exists()) {
-            // 방이 삭제됐거나 존재하지 않으면 목록에서 제거
+            // Firebase가 없다고 확인 — confirmedMissingIds에 추가하고 rooms에서 제거
+            setConfirmedMissingIds((prev) => new Set([...prev, id]));
             setRooms((prev) => {
               const next = { ...prev };
               delete next[id];
@@ -42,6 +47,13 @@ export function useRooms(roomIds: string[]): Room[] {
             });
             return;
           }
+          // 존재 확인된 방은 missing 목록에서 제거 (상태 변경 가능성 대비)
+          setConfirmedMissingIds((prev) => {
+            if (!prev.has(id)) return prev;
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
 
           // Firebase snapshot.val()은 rooms/{id} 구조가 보장되므로 캐스팅
           const data = snapshot.val() as Omit<Room, 'id'>;
@@ -61,5 +73,8 @@ export function useRooms(roomIds: string[]): Room[] {
   }, [key]);
 
   // createdAt 내림차순 정렬 (최근 방이 위로)
-  return Object.values(rooms).sort((a, b) => b.createdAt - a.createdAt);
+  return {
+    rooms: Object.values(rooms).sort((a, b) => b.createdAt - a.createdAt),
+    confirmedMissingIds,
+  };
 }

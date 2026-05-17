@@ -3,6 +3,7 @@ import HomeScreen from './screens/HomeScreen/HomeScreen';
 import CreateScreen from './screens/CreateScreen/CreateScreen';
 import TripScreen from './screens/TripScreen/TripScreen';
 import SettleScreen from './screens/SettleScreen/SettleScreen';
+import HiddenRoomsScreen from './screens/HiddenRoomsScreen/HiddenRoomsScreen';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/create" element={<CreateScreen />} />
         <Route path="/room/:roomId" element={<TripScreen />} />
         <Route path="/room/:roomId/settle" element={<SettleScreen />} />
+        <Route path="/hidden" element={<HiddenRoomsScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
