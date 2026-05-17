@@ -287,3 +287,50 @@
 | TC-433 | calcSettlement | 소수점 잔액 발생 | 100원 단위 반올림, 무한 루프 없음 | Unit |
 | TC-434 | calcSettlement | members: [] | transfers: [], balance: {} | Unit |
 | TC-435 | calcSettlement | 복잡한 3인 케이스 | 최소 송금 횟수 그리디 알고리즘 결과 | Unit |
+
+### `isOwner`
+
+| ID | 함수 | 입력값 | 기대 결과 | 테스트 유형 |
+|---|---|---|---|---|
+| TC-440 | isOwner | localStorage 토큰 = Firebase 토큰 일치 | true | Unit |
+| TC-441 | isOwner | localStorage 토큰 ≠ Firebase 토큰 | false | Unit |
+| TC-442 | isOwner | localStorage에 토큰 없음 | false | Unit |
+| TC-443 | isOwner | ownerToken = undefined (구버전 방) | false | Unit |
+| TC-444 | isOwner | ownerToken = "" (빈 문자열) | false | Unit |
+| TC-445 | isOwner | 다른 방 ID의 토큰 | false (방 ID 불일치) | Unit |
+
+### `useHiddenRooms`
+
+| ID | 함수 | 입력값 | 기대 결과 | 테스트 유형 |
+|---|---|---|---|---|
+| TC-450 | useHiddenRooms | 초기 상태 (localStorage 없음) | hiddenRoomIds: [] | Unit |
+| TC-451 | useHiddenRooms | localStorage에 기존 목록 있음 | 초기 로드 정상 | Unit |
+| TC-452 | hideRoom | roomId 추가 | hiddenRoomIds에 포함 + localStorage 동기화 | Unit |
+| TC-453 | hideRoom | 중복 roomId 추가 | 1개만 존재 | Unit |
+| TC-454 | restoreRoom | 존재하는 roomId 제거 | hiddenRoomIds에서 제거 + 나머지 유지 | Unit |
+| TC-455 | removeFromHidden | roomId 제거 | restoreRoom과 동일 동작 | Unit |
+| TC-456 | isHidden | 숨긴 roomId 조회 | true | Unit |
+| TC-457 | isHidden | 숨기지 않은 roomId 조회 | false | Unit |
+| TC-458 | useHiddenRooms | localStorage 데이터 손상 | 빈 배열로 초기화, 앱 정상 동작 | Unit |
+
+---
+
+## 숨김 / 삭제 기능 (STEP 3~6)
+
+### 홈 화면 ⋮ 메뉴
+
+| ID | 화면 | 동작 | 입력값 | 기대 결과 | 테스트 유형 |
+|---|---|---|---|---|---|
+| TC-500 | 홈 | ⋮ 메뉴 → 숨긴 여행 보기 | 메뉴 버튼 클릭 | 드롭다운 표시 → 클릭 시 `/hidden`으로 이동 | E2E |
+| TC-501 | 숨긴여행 | 숨긴 여행 없을 때 | hiddenRooms 비어있음 | "숨긴 여행이 없어요." 빈 상태 메시지 표시 | E2E |
+
+### TripScreen / SettleScreen ⋮ 메뉴
+
+| ID | 화면 | 동작 | 입력값 | 기대 결과 | 테스트 유형 |
+|---|---|---|---|---|---|
+| TC-502 | TripScreen | 이 여행 숨기기 | ⋮ → 숨기기 클릭 | 즉시 숨김 처리 → 홈 이동 → 홈 목록에서 사라짐 | E2E |
+| TC-503 | 숨긴여행 | 숨긴 여행 복원 | "복원" 버튼 클릭 | hiddenRooms에서 제거 → 홈 목록에 다시 표시 | E2E |
+| TC-504 | TripScreen | 방장 + status=done → 삭제 버튼 노출 | ownerToken 일치 + done 상태 | "이 여행 삭제하기" 메뉴 항목 표시 | E2E |
+| TC-505 | TripScreen | 참여자 기기 → 삭제 버튼 미노출 | ownerToken 없음 | "이 여행 삭제하기" 미표시, "이 여행 숨기기"만 표시 | E2E |
+| TC-506 | TripScreen | active 방 → 방장도 삭제 버튼 미노출 | ownerToken 일치 + active 상태 | "이 여행 삭제하기" 미표시 | E2E |
+| TC-507 | TripScreen | 방 삭제 → 홈으로 이동 + 목록 제거 | 삭제 확인 다이얼로그 → 삭제 | Firebase 데이터 삭제 → 홈 이동 → 목록에서 사라짐 | E2E |
