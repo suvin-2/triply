@@ -6,6 +6,7 @@ export interface TestRoomData {
   status?: 'active' | 'done';
   startDate?: string;
   endDate?: string;
+  ownerToken?: string;
 }
 
 export interface TestExpense {
@@ -27,6 +28,7 @@ export async function createTestRoom(data: TestRoomData): Promise<string> {
       startDate: data.startDate ?? '',
       endDate: data.endDate ?? '',
       createdAt: Date.now(),
+      ...(data.ownerToken ? { ownerToken: data.ownerToken } : {}),
     }),
   });
   const result = (await res.json()) as { name: string };
