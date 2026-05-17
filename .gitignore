@@ -31,3 +31,6 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# claude
+CLAUDE.md
