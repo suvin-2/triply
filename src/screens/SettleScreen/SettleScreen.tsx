@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ref, update } from 'firebase/database';
+import { ref, update, remove } from 'firebase/database';
+import { useHiddenRooms } from '../../hooks/useHiddenRooms';
+import { isOwner } from '../../utils/isOwner';
 import html2canvas from 'html2canvas';
 import { db } from '../../lib/firebase';
 import { useRoom } from '../../hooks/useRoom';
@@ -24,9 +26,27 @@ export default function SettleScreen() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [settling, setSettling] = useState(false);
   const [capturing, setCapturing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // ReceiptCard DOM 요소 — html2canvas 캡처 대상
   const receiptRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const { hideRoom } = useHiddenRooms();
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [menuOpen]);
 
   if (loading) {
     return (
@@ -58,6 +78,28 @@ export default function SettleScreen() {
   const total = room.expenses.reduce((sum, e) => sum + e.amount, 0);
   // async 클로저에서 TypeScript가 room을 다시 null로 볼 수 있으므로 미리 캡처
   const roomName = room.name;
+
+  const canDelete = isOwner(roomId!, room.ownerToken) && room.status === 'done';
+
+  async function handleDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await remove(ref(db, `rooms/${roomId}`));
+      localStorage.removeItem(`triply_owner_${roomId}`);
+      navigate('/');
+    } catch (err) {
+      console.error('[SettleScreen] 방 삭제 실패:', err);
+      alert('삭제에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function handleHide() {
+    hideRoom(roomId!);
+    navigate('/');
+  }
 
   async function handleDone() {
     if (settling) return;
@@ -153,7 +195,37 @@ export default function SettleScreen() {
           <Chevron dir="left" size={14} color="#0A0A0A" />
         </button>
         <div className={s.topTitle}>정산 결과</div>
-        <div style={{ width: 22 }} />
+        <div className={s.menuWrap} ref={menuRef}>
+          <button
+            className={s.menuBtn}
+            aria-label="메뉴"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20">
+              <circle cx="4" cy="10" r="1.5" fill="#0A0A0A" />
+              <circle cx="10" cy="10" r="1.5" fill="#0A0A0A" />
+              <circle cx="16" cy="10" r="1.5" fill="#0A0A0A" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <div className={s.dropdown}>
+              <button
+                className={s.dropdownItem}
+                onClick={() => { setMenuOpen(false); handleHide(); }}
+              >
+                이 여행 숨기기
+              </button>
+              {canDelete && (
+                <button
+                  className={`${s.dropdownItem} ${s.dropdownItemDanger}`}
+                  onClick={() => { setMenuOpen(false); setDeleteConfirmOpen(true); }}
+                >
+                  이 여행 삭제하기
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 히어로 */}
@@ -258,6 +330,30 @@ export default function SettleScreen() {
           {room.status === 'done' ? '이미 정산 완료된 여행이에요' : '정산 완료로 표시하기'}
         </button>
       </div>
+
+      {/* 방 삭제 확인 다이얼로그 */}
+      {deleteConfirmOpen && (
+        <div className={s.dialogOverlay} onClick={() => setDeleteConfirmOpen(false)}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>이 여행을 삭제할까요?</p>
+            <p className={s.dialogDesc}>
+              삭제하면 모든 데이터가 사라지고 복구할 수 없어요.
+            </p>
+            <div className={s.dialogBtns}>
+              <button className={s.dialogCancel} onClick={() => setDeleteConfirmOpen(false)}>
+                취소
+              </button>
+              <button
+                className={s.dialogDelete}
+                onClick={() => { setDeleteConfirmOpen(false); handleDelete(); }}
+                disabled={deleting}
+              >
+                {deleting ? '삭제 중...' : '삭제하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 정산 완료 확인 다이얼로그 */}
       {confirmOpen && (

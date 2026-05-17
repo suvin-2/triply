@@ -50,6 +50,67 @@
   letter-spacing: -0.01em;
 }
 
+.menuWrap {
+  position: relative;
+}
+
+.menuBtn {
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: $card;
+  border: 1px solid $line;
+  border-radius: $radius;
+  min-width: 150px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid $line;
+  font-size: 14px;
+  font-family: inherit;
+  color: $ink;
+  cursor: pointer;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: $paper; }
+}
+
+.dropdownItemDanger {
+  color: $accent;
+}
+
+.dialogDelete {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: $radius;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: $accent;
+  color: #fff;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
 // ─── 히어로 ──────────────────────────────────────────────────────
 .hero {
   padding: 6px $screen-px 18px;

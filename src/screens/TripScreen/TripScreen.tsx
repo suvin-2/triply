@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ref, remove } from 'firebase/database';
+import { db } from '../../lib/firebase';
 import { useRoom } from '../../hooks/useRoom';
 import { useLocalRooms } from '../../hooks/useLocalRooms';
+import { useHiddenRooms } from '../../hooks/useHiddenRooms';
 import { useRoomUser } from '../../hooks/useRoomUser';
+import { isOwner } from '../../utils/isOwner';
 import { Avatar, AvatarStack, Chevron } from '../../components/shared/atoms';
 import { fmt, fmtTimestamp } from '../../utils/format';
 import { formatDateLabel } from '../../utils/formatDate';
@@ -31,12 +35,30 @@ export default function TripScreen() {
   const [filter, setFilter] = useState<FilterCategory>('전체');
   const [nameInput, setNameInput] = useState('');
   const [addOpen, setAddOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const { hideRoom } = useHiddenRooms();
 
   // 방 진입 시 localStorage에 roomId 등록 (초대 링크로 직접 진입한 경우 대비)
   // 렌더 중 setState 호출 금지 — useEffect로 이동
   useEffect(() => {
     if (roomId) addRoomId(roomId);
   }, [roomId, addRoomId]);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [menuOpen]);
 
   // ─── 로딩 / 에러 상태 ─────────────────────────────────────
   if (loading) {
@@ -60,6 +82,29 @@ export default function TripScreen() {
         </div>
       </div>
     );
+  }
+
+  // ─── 방장 여부 + 액션 핸들러 ──────────────────────────────
+  const canDelete = isOwner(roomId!, room.ownerToken) && room.status === 'done';
+
+  async function handleDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await remove(ref(db, `rooms/${roomId}`));
+      localStorage.removeItem(`triply_owner_${roomId}`);
+      navigate('/');
+    } catch (err) {
+      console.error('[TripScreen] 방 삭제 실패:', err);
+      alert('삭제에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function handleHide() {
+    hideRoom(roomId!);
+    navigate('/');
   }
 
   // ─── 통계 계산 ────────────────────────────────────────────
@@ -93,13 +138,37 @@ export default function TripScreen() {
           </div>
         )}
 
-        <button className={s.menuBtn} aria-label="메뉴">
-          <svg width="20" height="20" viewBox="0 0 20 20">
-            <circle cx="4" cy="10" r="1.5" fill="#0A0A0A" />
-            <circle cx="10" cy="10" r="1.5" fill="#0A0A0A" />
-            <circle cx="16" cy="10" r="1.5" fill="#0A0A0A" />
-          </svg>
-        </button>
+        <div className={s.menuWrap} ref={menuRef}>
+          <button
+            className={s.menuBtn}
+            aria-label="메뉴"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20">
+              <circle cx="4" cy="10" r="1.5" fill="#0A0A0A" />
+              <circle cx="10" cy="10" r="1.5" fill="#0A0A0A" />
+              <circle cx="16" cy="10" r="1.5" fill="#0A0A0A" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <div className={s.dropdown}>
+              <button
+                className={s.dropdownItem}
+                onClick={() => { setMenuOpen(false); handleHide(); }}
+              >
+                이 여행 숨기기
+              </button>
+              {canDelete && (
+                <button
+                  className={`${s.dropdownItem} ${s.dropdownItemDanger}`}
+                  onClick={() => { setMenuOpen(false); setDeleteConfirmOpen(true); }}
+                >
+                  이 여행 삭제하기
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 히어로 — 여행 이름 + 통계 */}
@@ -237,6 +306,30 @@ export default function TripScreen() {
 
       {addOpen && (
         <AddExpenseSheet room={room} onClose={() => setAddOpen(false)} />
+      )}
+
+      {/* 방 삭제 확인 다이얼로그 */}
+      {deleteConfirmOpen && (
+        <div className={s.dialogOverlay} onClick={() => setDeleteConfirmOpen(false)}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>이 여행을 삭제할까요?</p>
+            <p className={s.dialogDesc}>
+              삭제하면 모든 데이터가 사라지고 복구할 수 없어요.
+            </p>
+            <div className={s.dialogBtns}>
+              <button className={s.dialogCancel} onClick={() => setDeleteConfirmOpen(false)}>
+                취소
+              </button>
+              <button
+                className={s.dialogDelete}
+                onClick={() => { setDeleteConfirmOpen(false); handleDelete(); }}
+                disabled={deleting}
+              >
+                {deleting ? '삭제 중...' : '삭제하기'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
