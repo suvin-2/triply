@@ -406,6 +406,25 @@
   }
 }
 
+.revertBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  border-radius: $radius;
+  border: 1px solid $line;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $mute;
+  transition: opacity 0.12s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 // ─── 확인 다이얼로그 ──────────────────────────────────────────────
 .dialogOverlay {
   position: absolute;

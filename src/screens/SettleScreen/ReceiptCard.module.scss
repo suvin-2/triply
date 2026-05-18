@@ -1,197 +1,305 @@
 @use '../../styles/variables' as *;
 
+$receipt-bg:   #FBF8F1;
+$receipt-ink:  #0A0A0A;
+$receipt-mute: #8C8579;
+$receipt-line: #E5E0D6;
+
 .card {
-  background: #fff;
+  background: $receipt-bg;
+  font-family: $font-mono;
+  color: $receipt-ink;
   width: 100%;
 }
 
-// 상단 톱니 — 반원을 반복 배치하여 절취선 효과
-.serratedTop {
-  height: 14px;
-  background: radial-gradient(circle at 10px 0, $bg 9px, #fff 9px);
-  background-size: 20px 14px;
-  background-repeat: repeat-x;
-}
-
-// 하단 톱니
-.serratedBottom {
-  height: 14px;
-  background: radial-gradient(circle at 10px 14px, $bg 9px, #fff 9px);
-  background-size: 20px 14px;
-  background-repeat: repeat-x;
-}
-
 .body {
-  padding: 16px 22px 22px;
+  padding: 20px 22px 6px;
 }
 
-// ─── 헤더 ────────────────────────────────────────────────────────
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+// ─── 브랜드 ─────────────────────────────────────────────────────
+.brandWrap {
+  text-align: center;
   margin-bottom: 14px;
 }
 
-.brand {
+.brandBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border: 1.5px solid $receipt-ink;
+  border-radius: 2px;
+}
+
+.brandDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: $accent;
+  border-radius: 50%;
+}
+
+.brandText {
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   font-weight: 700;
-  color: $ink;
 }
 
-.dateLabel {
-  font-size: 10px;
-  color: $mute;
-  letter-spacing: 0.06em;
+.receiptLabel {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  margin-top: 10px;
+  color: $receipt-mute;
 }
 
-// ─── 여행 이름 ────────────────────────────────────────────────────
+// ─── 여행 이름 ──────────────────────────────────────────────────
+.tripWrap {
+  text-align: center;
+  padding-bottom: 12px;
+}
+
 .tripTitle {
+  font-family: $font-sans;
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
-.memberLine {
+.tripDate {
   font-size: 10px;
-  color: $mute;
-  letter-spacing: 0.06em;
-  margin-bottom: 14px;
+  margin-top: 6px;
+  color: $receipt-mute;
+  letter-spacing: 0.08em;
 }
 
-// ─── 구분선 ──────────────────────────────────────────────────────
-.divider {
-  height: 1px;
-  background: $ink;
-  margin: 14px 0;
+// ─── ORDER 헤더 ──────────────────────────────────────────────────
+.orderBlock {
+  font-size: 10px;
+  line-height: 1.7;
+  padding: 12px 0;
+  border-top: 1px dashed $receipt-ink;
 }
 
-.dividerDash {
-  height: 1px;
-  border: none;
-  border-top: 1px dashed $line;
-  margin: 14px 0;
-}
-
-// ─── 섹션 레이블 ──────────────────────────────────────────────────
-.sectionLabel {
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  color: $mute;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-// ─── 지출 항목 ────────────────────────────────────────────────────
-.itemList {
+.orderRow {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
+  justify-content: space-between;
+}
+
+// ─── QTY / ITEM / AMOUNT 그리드 ──────────────────────────────────
+.itemBlock {
+  border-top: 1px dashed $receipt-ink;
+  padding: 10px 0;
+}
+
+.itemHeader {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 8px;
+  font-size: 9px;
+  color: $receipt-mute;
+  padding-bottom: 8px;
+  border-bottom: 1px dotted $receipt-line;
+  letter-spacing: 0.08em;
 }
 
 .itemRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
   gap: 8px;
+  font-size: 11px;
+  padding-top: 7px;
+  align-items: baseline;
 }
 
-.itemLeft {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+.itemQty {
+  color: $receipt-mute;
+}
+
+.itemInfo {
   min-width: 0;
-  flex: 1;
 }
 
 .itemTitle {
-  font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.itemPayer {
-  font-size: 10px;
-  color: $mute;
-  white-space: nowrap;
-  flex-shrink: 0;
+.itemSub {
+  font-size: 9px;
+  color: $receipt-mute;
+  margin-top: 2px;
+  letter-spacing: 0.04em;
 }
 
 .itemAmount {
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 700;
 }
 
-// ─── 합계 ────────────────────────────────────────────────────────
+.right {
+  text-align: right;
+}
+
+.overflowRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 8px;
+  padding-top: 7px;
+}
+
+.overflowText {
+  font-size: 10px;
+  color: $receipt-mute;
+  letter-spacing: 0.04em;
+}
+
+// ─── 합계 ───────────────────────────────────────────────────────
+.totalBlock {
+  border-top: 1px dashed $receipt-ink;
+  padding: 10px 0;
+  font-size: 11px;
+}
+
 .totalRow {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
+  padding-top: 4px;
 }
 
 .totalLabel {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: $mute;
-  font-weight: 600;
+  color: $receipt-mute;
 }
 
-.totalAmount {
-  font-size: 22px;
+.totalValue {
   font-weight: 700;
-  letter-spacing: -0.04em;
 }
 
-// ─── 정산 내역 ────────────────────────────────────────────────────
+.grandTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1.5px solid $receipt-ink;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.grandTotalLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.grandTotalAmount {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.perPersonRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: $receipt-mute;
+  margin-top: 4px;
+}
+
+// ─── 정산 내역 ──────────────────────────────────────────────────
+.settleBlock {
+  border-top: 1px dashed $receipt-ink;
+  padding: 10px 0;
+}
+
+.settleHeader {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: $receipt-mute;
+  margin-bottom: 8px;
+}
+
+.settleEmpty {
+  font-size: 11px;
+  text-align: center;
+  padding: 6px 0;
+  color: $receipt-mute;
+}
+
 .settleRow {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 3px 0;
+  align-items: baseline;
+  font-size: 11px;
+  padding-top: 5px;
 }
 
 .settleName {
-  font-size: 12px;
-  color: $ink;
+  font-weight: 700;
+}
+
+.settleArrow {
+  color: $receipt-mute;
+  margin: 0 6px;
 }
 
 .settleAmount {
-  font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+// ─── AUTH ────────────────────────────────────────────────────────
+.authBlock {
+  border-top: 1px dashed $receipt-ink;
+  padding: 10px 0;
+  font-size: 10px;
+  line-height: 1.8;
+}
+
+.statusChip {
+  background: $receipt-ink;
+  color: $receipt-bg;
+  padding: 1px 6px;
+}
+
+// ─── THANK YOU ──────────────────────────────────────────────────
+.thankYou {
+  text-align: center;
+  padding: 16px 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  line-height: 2;
+}
+
+.thankYouSub {
+  color: $receipt-mute;
 }
 
 // ─── 바코드 ──────────────────────────────────────────────────────
 .barcodeWrap {
-  margin-top: 22px;
+  padding-bottom: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .barcode {
   display: flex;
-  align-items: stretch;
-  height: 42px;
-  gap: 2px;
+  align-items: flex-end;
+  height: 44px;
+  gap: 1px;
+  justify-content: center;
 }
 
 .bar {
-  background: $ink;
+  height: 100%;
   flex-shrink: 0;
   min-width: 1px;
 }
 
 .barcodeNum {
-  font-size: 8px;
-  letter-spacing: 0.12em;
-  color: $mute;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: $receipt-mute;
+  text-align: center;
+  margin-top: 4px;
 }

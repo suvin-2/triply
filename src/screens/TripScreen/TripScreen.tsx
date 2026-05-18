@@ -2,17 +2,20 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ref, remove } from 'firebase/database';
 import { db } from '../../lib/firebase';
-import { useRoom } from '../../hooks/useRoom';
+import { useRoom, addMember } from '../../hooks/useRoom';
+import { useLongPress } from '../../hooks/useLongPress';
 import { useLocalRooms } from '../../hooks/useLocalRooms';
 import { useHiddenRooms } from '../../hooks/useHiddenRooms';
 import { useRoomUser } from '../../hooks/useRoomUser';
 import { isOwner } from '../../utils/isOwner';
 import { Avatar, AvatarStack, Chevron } from '../../components/shared/atoms';
+import CharCounter from '../../components/shared/CharCounter';
 import { fmt, fmtTimestamp } from '../../utils/format';
 import { formatDateLabel } from '../../utils/formatDate';
 import { CATEGORIES } from '../../types';
-import type { ExpenseCategory } from '../../types';
+import type { Expense, ExpenseCategory } from '../../types';
 import AddExpenseSheet from './AddExpenseSheet';
+import EditExpenseSheet from './EditExpenseSheet';
 import s from './TripScreen.module.scss';
 
 type FilterCategory = '전체' | ExpenseCategory;
@@ -38,6 +41,16 @@ export default function TripScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [addMemberInput, setAddMemberInput] = useState('');
+  const [addMemberError, setAddMemberError] = useState('');
+  const [addMemberLoading, setAddMemberLoading] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [expenseActionOpen, setExpenseActionOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [expenseDeleteConfirmOpen, setExpenseDeleteConfirmOpen] = useState(false);
+  const [expenseDeleting, setExpenseDeleting] = useState(false);
+  const [toast, setToast] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { hideRoom } = useHiddenRooms();
@@ -47,6 +60,13 @@ export default function TripScreen() {
   useEffect(() => {
     if (roomId) addRoomId(roomId);
   }, [roomId, addRoomId]);
+
+  // 토스트 메시지 3초 후 자동 소멸
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(''), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -107,6 +127,46 @@ export default function TripScreen() {
     navigate('/');
   }
 
+  async function handleAddMember() {
+    const name = addMemberInput.trim();
+    if (!name) return;
+    if (room.members.includes(name)) {
+      setAddMemberError('이미 있는 이름이에요.');
+      return;
+    }
+    if (room.members.length >= 10) {
+      setAddMemberError('인원이 가득 찼어요. (최대 10명)');
+      return;
+    }
+    setAddMemberLoading(true);
+    try {
+      await addMember(roomId!, name);
+      setAddMemberOpen(false);
+      setAddMemberInput('');
+      setAddMemberError('');
+    } catch (err) {
+      console.error('[TripScreen] 인원 추가 실패:', err);
+      setAddMemberError('인원 추가에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setAddMemberLoading(false);
+    }
+  }
+
+  async function handleExpenseDelete() {
+    if (!selectedExpense || expenseDeleting) return;
+    setExpenseDeleting(true);
+    try {
+      await remove(ref(db, `rooms/${roomId}/expenses/${selectedExpense.id}`));
+      setExpenseDeleteConfirmOpen(false);
+      setSelectedExpense(null);
+    } catch (err) {
+      console.error('[TripScreen] 지출 삭제 실패:', err);
+      alert('지출 삭제에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setExpenseDeleting(false);
+    }
+  }
+
   // ─── 통계 계산 ────────────────────────────────────────────
   const total = room.expenses.reduce((sum, e) => sum + e.amount, 0);
   const perPerson = room.members.length > 0 ? total / room.members.length : 0;
@@ -152,12 +212,22 @@ export default function TripScreen() {
           </button>
           {menuOpen && (
             <div className={s.dropdown}>
-              <button
-                className={s.dropdownItem}
-                onClick={() => { setMenuOpen(false); handleHide(); }}
-              >
-                이 여행 숨기기
-              </button>
+              {room.status === 'active' && (
+                <button
+                  className={s.dropdownItem}
+                  onClick={() => { setMenuOpen(false); setAddMemberOpen(true); }}
+                >
+                  인원 추가
+                </button>
+              )}
+              {room.status === 'done' && (
+                <button
+                  className={s.dropdownItem}
+                  onClick={() => { setMenuOpen(false); handleHide(); }}
+                >
+                  이 여행 숨기기
+                </button>
+              )}
               {canDelete && (
                 <button
                   className={`${s.dropdownItem} ${s.dropdownItemDanger}`}
@@ -212,6 +282,9 @@ export default function TripScreen() {
 
       {/* 지출 목록 */}
       <div className={s.expenseList}>
+        {room.status === 'done' && (
+          <div className={s.doneNotice}>정산이 완료된 여행이에요</div>
+        )}
         {filtered.length === 0 && (
           <div className={s.emptyList}>
             {filter === '전체' ? '아직 지출이 없어요' : `${filter} 항목이 없어요`}
@@ -219,48 +292,32 @@ export default function TripScreen() {
         )}
 
         {filtered.map((expense) => (
-          <div key={expense.id} className={s.expenseItem}>
-            {/* 카테고리 + 날짜 */}
-            <div className={s.expenseMeta}>
-              <div className={s.expenseCategory}>{expense.category}</div>
-              <div className={s.expenseDate}>
-                {fmtTimestamp(expense.createdAt).split(' ')[0]}
-              </div>
-            </div>
-
-            {/* 항목명 + 결제 정보 */}
-            <div className={s.expenseBody}>
-              <div className={s.expenseTitle}>{expense.title}</div>
-              <div className={s.expensePayer}>
-                <Avatar name={expense.paidBy} size={16} dark />
-                <span className={s.payerName}>{expense.paidBy} 결제</span>
-                <span className={s.payerDot} />
-                <span className={s.splitCount}>{expense.splitWith.length}명 분담</span>
-              </div>
-            </div>
-
-            {/* 금액 */}
-            <div className={s.expenseAmount}>
-              <div className={`mono ${s.amountTotal}`}>{fmt(expense.amount)}</div>
-              {expense.splitWith.length > 0 && (
-                <div className={s.amountPer}>
-                  / {fmt(expense.amount / expense.splitWith.length)}
-                </div>
-              )}
-            </div>
-          </div>
+          <ExpenseItem
+            key={expense.id}
+            expense={expense}
+            canEdit={room.status === 'active'}
+            onLongPress={(e) => { setSelectedExpense(e); setExpenseActionOpen(true); }}
+          />
         ))}
       </div>
 
       {/* FAB + 정산하기 */}
       <div className={s.fabBar}>
-        <button
-          className={s.fab}
-          onClick={() => setAddOpen(true)}
-          aria-label="지출 추가"
-        >
-          +
-        </button>
+        {room.status === 'active' && (
+          <button
+            className={s.fab}
+            onClick={() => {
+              if (room.expenses.length >= 200) {
+                setToast('지출이 너무 많아요. 최대 200건까지 입력할 수 있어요.');
+                return;
+              }
+              setAddOpen(true);
+            }}
+            aria-label="지출 추가"
+          >
+            +
+          </button>
+        )}
         <button
           className={s.settleBtn}
           onClick={() => navigate(`/room/${roomId}/settle`)}
@@ -304,6 +361,8 @@ export default function TripScreen() {
         </div>
       )}
 
+      {toast && <div className={s.toast}>{toast}</div>}
+
       {addOpen && (
         <AddExpenseSheet room={room} onClose={() => setAddOpen(false)} />
       )}
@@ -331,6 +390,157 @@ export default function TripScreen() {
           </div>
         </div>
       )}
+
+      {/* 지출 액션 모달 (수정 / 삭제 선택) */}
+      {expenseActionOpen && selectedExpense && (
+        <div className={s.dialogOverlay} onClick={() => setExpenseActionOpen(false)}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>{selectedExpense.title}</p>
+            <div className={s.dialogBtns} style={{ flexDirection: 'column' }}>
+              {room.status === 'active' && (
+                <button
+                  className={s.dialogConfirm}
+                  onClick={() => { setExpenseActionOpen(false); setEditOpen(true); }}
+                >
+                  수정하기
+                </button>
+              )}
+              <button
+                className={s.dialogDelete}
+                onClick={() => { setExpenseActionOpen(false); setExpenseDeleteConfirmOpen(true); }}
+                style={{ marginTop: 8 }}
+              >
+                삭제하기
+              </button>
+              <button
+                className={s.dialogCancel}
+                onClick={() => setExpenseActionOpen(false)}
+                style={{ marginTop: 8 }}
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 지출 삭제 확인 다이얼로그 */}
+      {expenseDeleteConfirmOpen && selectedExpense && (
+        <div className={s.dialogOverlay} onClick={() => setExpenseDeleteConfirmOpen(false)}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>지출을 삭제할까요?</p>
+            <p className={s.dialogDesc}>
+              "{selectedExpense.title}" 항목이 삭제되고 복구할 수 없어요.
+            </p>
+            <div className={s.dialogBtns}>
+              <button className={s.dialogCancel} onClick={() => setExpenseDeleteConfirmOpen(false)}>
+                취소
+              </button>
+              <button
+                className={s.dialogDelete}
+                onClick={handleExpenseDelete}
+                disabled={expenseDeleting}
+              >
+                {expenseDeleting ? '삭제 중...' : '삭제하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 지출 수정 바텀시트 */}
+      {editOpen && selectedExpense && (
+        <EditExpenseSheet
+          room={room}
+          expense={selectedExpense}
+          onClose={() => setEditOpen(false)}
+          onSaved={() => { setEditOpen(false); setSelectedExpense(null); }}
+        />
+      )}
+
+      {/* 인원 추가 모달 */}
+      {addMemberOpen && (
+        <div className={s.dialogOverlay} onClick={() => { setAddMemberOpen(false); setAddMemberInput(''); setAddMemberError(''); }}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>인원 추가</p>
+            <p className={s.dialogDesc}>추가된 인원은 이후 지출부터 참여할 수 있어요.</p>
+            <div className={s.addMemberInputWrap}>
+              <input
+                className={s.addMemberInput}
+                value={addMemberInput}
+                onChange={(e) => { setAddMemberInput(e.target.value); setAddMemberError(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddMember(); }}
+                placeholder="이름 입력"
+                maxLength={10}
+                autoFocus
+              />
+              <CharCounter current={addMemberInput.length} max={10} />
+              {addMemberError && <p className={s.addMemberError}>{addMemberError}</p>}
+            </div>
+            <div className={s.dialogBtns}>
+              <button className={s.dialogCancel} onClick={() => { setAddMemberOpen(false); setAddMemberInput(''); setAddMemberError(''); }}>
+                취소
+              </button>
+              <button
+                className={s.dialogConfirm}
+                onClick={handleAddMember}
+                disabled={!addMemberInput.trim() || addMemberLoading}
+              >
+                {addMemberLoading ? '추가 중...' : '추가하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// ExpenseItem — 개별 지출 카드. useLongPress 훅을 사용하므로 TripScreen
+// 함수 외부에 별도 컴포넌트로 분리한다 (훅은 map 안에서 호출 불가).
+// ─────────────────────────────────────────────────────────────────────
+interface ExpenseItemProps {
+  expense: Expense;
+  canEdit: boolean;
+  onLongPress: (expense: Expense) => void;
+}
+
+function ExpenseItem({ expense, canEdit, onLongPress }: ExpenseItemProps) {
+  const longPress = useLongPress(() => {
+    if (canEdit) onLongPress(expense);
+  });
+
+  return (
+    <div className={s.expenseItem} {...longPress}>
+      {/* 카테고리 + 날짜 */}
+      <div className={s.expenseMeta}>
+        <div className={s.expenseCategory}>{expense.category}</div>
+        <div className={s.expenseDate}>
+          {fmtTimestamp(expense.createdAt).split(' ')[0]}
+        </div>
+      </div>
+
+      {/* 항목명 + 결제 정보 */}
+      <div className={s.expenseBody}>
+        <div className={s.expenseTitle}>{expense.title}</div>
+        <div className={s.expensePayer}>
+          <Avatar name={expense.paidBy} size={16} dark />
+          <span className={s.payerName}>{expense.paidBy} 결제</span>
+          <span className={s.payerDot} />
+          <span className={s.splitCount}>{expense.splitWith.length}명 분담</span>
+        </div>
+      </div>
+
+      {/* 금액 */}
+      <div className={s.expenseAmount}>
+        <div className={`mono ${s.amountTotal}`}>{fmt(expense.amount)}</div>
+        {expense.splitWith.length > 0 && (
+          <div className={s.amountPer}>
+            / {fmt(expense.amount / expense.splitWith.length)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

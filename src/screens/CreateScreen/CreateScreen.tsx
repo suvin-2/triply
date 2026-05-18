@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import { useLocalRooms } from '../../hooks/useLocalRooms';
 import { toFirebaseDate } from '../../utils/formatDate';
 import { Caps, Chevron, PrimaryBtn } from '../../components/shared/atoms';
+import CharCounter from '../../components/shared/CharCounter';
 import s from './CreateScreen.module.scss';
 
 /**
@@ -125,7 +126,9 @@ export default function CreateScreen() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="제주 3박 4일"
+            maxLength={30}
           />
+          <CharCounter current={name.length} max={30} />
         </div>
 
         {/* 날짜 */}
@@ -178,11 +181,13 @@ export default function CreateScreen() {
               onCompositionEnd={() => setIsComposing(false)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !isComposing) addMember(); }}
               placeholder="이름 입력 후 엔터"
+              maxLength={10}
             />
             <button className={s.addBtn} onClick={addMember}>
               + 추가
             </button>
           </div>
+          <CharCounter current={memberInput.length} max={10} />
         </div>
 
         <div className={s.formBottom} />

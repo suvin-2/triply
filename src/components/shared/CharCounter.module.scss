@@ -1,0 +1,13 @@
+@use '../../styles/variables' as *;
+
+.counter {
+  font-family: $font-mono;
+  font-size: 11px;
+  display: block;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.mute   { color: $mute; }
+.warn   { color: #F59E0B; }
+.danger { color: $accent; }

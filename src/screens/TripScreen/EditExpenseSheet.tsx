@@ -1,33 +1,34 @@
 import { useState, useEffect } from 'react';
-import { ref, push } from 'firebase/database';
+import { ref, update } from 'firebase/database';
 import { db } from '../../lib/firebase';
 import { Avatar, Caps, Chevron } from '../../components/shared/atoms';
 import CharCounter from '../../components/shared/CharCounter';
 import { fmt } from '../../utils/format';
 import { CATEGORIES } from '../../types';
-import type { RoomWithExpenses, ExpenseCategory } from '../../types';
-import s from './AddExpenseSheet.module.scss';
+import type { Expense, ExpenseCategory, RoomWithExpenses } from '../../types';
+import s from './EditExpenseSheet.module.scss';
 
 interface Props {
   room: RoomWithExpenses;
+  expense: Expense;
   onClose: () => void;
+  onSaved: () => void;
 }
 
 /**
- * 4본 — 지출 추가 바텀시트.
- * TripScreen 위에 88% 높이로 슬라이드업 렌더링된다.
- * 커스텀 키패드로 금액을 입력하고, Firebase에 지출을 저장한다.
+ * 지출 수정 바텀시트.
+ * AddExpenseSheet와 동일한 UI를 사용하되 기존 지출 값을 pre-fill하고,
+ * 저장 시 Firebase update()를 호출한다. createdAt은 수정하지 않는다.
  */
-export default function AddExpenseSheet({ room, onClose }: Props) {
+export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Props) {
   const [visible, setVisible] = useState(false);
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState(room.members[0] ?? '');
-  const [splitWith, setSplitWith] = useState<string[]>([...room.members]);
-  const [category, setCategory] = useState<ExpenseCategory>('식사');
-  const [submitting, setSubmitting] = useState(false);
+  const [title, setTitle] = useState(expense.title);
+  const [amount, setAmount] = useState(String(expense.amount));
+  const [paidBy, setPaidBy] = useState(expense.paidBy);
+  const [splitWith, setSplitWith] = useState<string[]>([...expense.splitWith]);
+  const [category, setCategory] = useState<ExpenseCategory>(expense.category);
+  const [saving, setSaving] = useState(false);
 
-  // mount 후 10ms 뒤 visible=true → CSS 트랜지션 실행
   useEffect(() => {
     const id = setTimeout(() => setVisible(true), 10);
     return () => clearTimeout(id);
@@ -37,26 +38,22 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
 
   const numAmount = parseInt(amount || '0', 10) || 0;
   const perPerson = splitWith.length > 0 ? numAmount / splitWith.length : 0;
-  const canSubmit = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
+  const canSave = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
   const allSelected = splitWith.length === room.members.length;
 
-  // ─── 커스텀 키패드 입력 처리 ─────────────────────────────
   function pressKey(key: string) {
     if (key === 'del') {
       setAmount((prev) => prev.slice(0, -1));
       return;
     }
-    // '00'은 값이 이미 있을 때만 추가 (0000 방지)
     if (key === '00') {
       setAmount((prev) => {
         if (prev === '') return '';
-        // 상한 초과 시 무시
         const next = parseInt(prev + '00', 10);
         return next > MAX_AMOUNT ? prev : prev + '00';
       });
       return;
     }
-    // 앞자리 0 제거 후 추가, 상한 초과 시 무시
     setAmount((prev) => {
       const next = (prev + key).replace(/^0+/, '') || '0';
       return parseInt(next, 10) > MAX_AMOUNT ? prev : next;
@@ -73,24 +70,24 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
     setSplitWith(allSelected ? [] : [...room.members]);
   }
 
-  async function handleSubmit() {
-    if (!canSubmit || submitting) return;
-    setSubmitting(true);
+  async function handleSave() {
+    if (!canSave || saving) return;
+    setSaving(true);
     try {
-      await push(ref(db, `rooms/${room.id}/expenses`), {
+      // createdAt은 수정하지 않음 — 원본 생성 시각 보존
+      await update(ref(db, `rooms/${room.id}/expenses/${expense.id}`), {
         title: title.trim(),
         amount: numAmount,
         paidBy,
         splitWith,
         category,
-        createdAt: Date.now(),
       });
-      onClose();
+      onSaved();
     } catch (err) {
-      console.error('[AddExpenseSheet] 지출 추가 실패:', err);
-      alert('지출 추가에 실패했어요. 다시 시도해주세요.');
+      console.error('[EditExpenseSheet] 지출 수정 실패:', err);
+      alert('지출 수정에 실패했어요. 다시 시도해주세요.');
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   }
 
@@ -113,8 +110,8 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
         {/* 시트 헤더 */}
         <div className={s.sheetHeader}>
           <div className={s.sheetTitle}>
-            <Caps>NEW</Caps>
-            <span className={s.sheetTitleText}>지출 추가</span>
+            <Caps>EDIT</Caps>
+            <span className={s.sheetTitleText}>지출 수정</span>
           </div>
           <button className={s.closeBtn} onClick={onClose} aria-label="닫기">
             <svg width="18" height="18" viewBox="0 0 18 18">
@@ -125,7 +122,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
 
         {/* 스크롤 영역 */}
         <div className={s.scrollArea}>
-          {/* 금액 — 히어로 디스플레이 */}
+          {/* 금액 디스플레이 */}
           <div className={s.amountBlock}>
             <div className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}>
               {numAmount === 0 ? '0' : fmt(numAmount)}
@@ -168,7 +165,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             </div>
           </div>
 
-          {/* 결제한 사람 — 단일 선택 */}
+          {/* 결제한 사람 */}
           <div className={s.fieldSection}>
             <div className={s.fieldLabel}>결제한 사람</div>
             <div className={s.payerList}>
@@ -185,7 +182,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             </div>
           </div>
 
-          {/* 참여 인원 — 다중 토글 */}
+          {/* 참여 인원 */}
           <div className={s.fieldSection}>
             <div className={s.participantHeader}>
               <div className={s.fieldLabel} style={{ marginBottom: 0 }}>
@@ -235,7 +232,6 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             {KEYPAD.map((key) => (
               <button key={key} className={s.keyBtn} onClick={() => pressKey(key)}>
                 {key === 'del' ? (
-                  // 백스페이스 아이콘
                   <svg width="22" height="16" viewBox="0 0 22 16">
                     <path
                       d="M7 1h13a2 2 0 012 2v10a2 2 0 01-2 2H7L1 8 7 1z"
@@ -258,18 +254,18 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
           </div>
         </div>
 
-        {/* 제출 버튼 */}
+        {/* 저장 버튼 */}
         <div className={s.submitBar}>
           <button
-            className={`${s.submitBtn} ${canSubmit && !submitting ? s.ready : s.notReady}`}
-            onClick={handleSubmit}
-            disabled={!canSubmit || submitting}
+            className={`${s.submitBtn} ${canSave && !saving ? s.ready : s.notReady}`}
+            onClick={handleSave}
+            disabled={!canSave || saving}
           >
             <span>
-              {submitting
-                ? '추가 중...'
-                : canSubmit
-                  ? `${fmt(numAmount)}원 추가하기`
+              {saving
+                ? '저장 중...'
+                : canSave
+                  ? `${fmt(numAmount)}원으로 저장하기`
                   : '항목명 · 금액 입력'}
             </span>
             <Chevron dir="right" size={14} color="#fff" />

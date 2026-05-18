@@ -1,9 +1,25 @@
 import { useEffect, useState } from 'react';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, runTransaction } from 'firebase/database';
 import { db } from '../lib/firebase';
 import { useLocalRooms } from './useLocalRooms';
 import { useHiddenRooms } from './useHiddenRooms';
 import type { Expense, RoomWithExpenses } from '../types';
+
+/**
+ * 방 인원을 1명 추가한다.
+ * runTransaction으로 동시 접속 race condition을 방지하고,
+ * 트랜잭션 내부에서도 중복·최대 인원(10명)을 재검증한다.
+ */
+export async function addMember(roomId: string, name: string): Promise<void> {
+  const membersRef = ref(db, `rooms/${roomId}/members`);
+  await runTransaction(membersRef, (current) => {
+    const members: string[] = current ?? [];
+    // 트랜잭션 내 재검증 — 동시 추가 시 중복·초과 방지
+    if (members.includes(name)) return members;
+    if (members.length >= 10) return members;
+    return [...members, name];
+  });
+}
 
 /**
  * Firebase Realtime Database에서 특정 방(room)을 실시간으로 구독한다.
