@@ -1,9 +1,9 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
 .screen {
   position: absolute;
   inset: 0;
-  padding-top: 54px;
+  padding-top: 20px;
   padding-bottom: 36px;
   background: $card;
   color: $ink;

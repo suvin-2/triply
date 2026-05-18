@@ -1,9 +1,9 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
 .screen {
   position: absolute;
   inset: 0;
-  padding-top: 54px;
+  padding-top: 20px;
   padding-bottom: 36px;
   background: $card;
   color: $ink;
@@ -107,8 +107,12 @@
   color: $ink;
   cursor: pointer;
 
-  &:last-child { border-bottom: none; }
-  &:hover { background: $paper; }
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: $paper;
+  }
 }
 
 .dropdownItemDanger {
@@ -178,7 +182,10 @@
   background: $accent;
   color: #fff;
 
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 // ─── 히어로 ─────────────────────────────────────────────────
@@ -276,7 +283,9 @@
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   flex-shrink: 0;
 
   &.active {

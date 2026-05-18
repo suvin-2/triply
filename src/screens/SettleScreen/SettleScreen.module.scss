@@ -1,9 +1,9 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
 .screen {
   position: absolute;
   inset: 0;
-  padding-top: 54px;
+  padding-top: 20px;
   background: $card;
   color: $ink;
   display: flex;
@@ -88,8 +88,12 @@
   color: $ink;
   cursor: pointer;
 
-  &:last-child { border-bottom: none; }
-  &:hover { background: $paper; }
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: $paper;
+  }
 }
 
 .dropdownItemDanger {
@@ -108,7 +112,10 @@
   background: $accent;
   color: #fff;
 
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 // ─── 히어로 ──────────────────────────────────────────────────────
@@ -163,7 +170,9 @@
   cursor: pointer;
   background: transparent;
   border-bottom: 2px solid transparent;
-  transition: color 0.12s, border-color 0.12s;
+  transition:
+    color 0.12s,
+    border-color 0.12s;
 
   &.active {
     color: $ink;
@@ -280,8 +289,8 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  background: #FEE500;
-  color: #1A1400;
+  background: #fee500;
+  color: #1a1400;
   transition: opacity 0.1s;
 
   &:active {
@@ -303,7 +312,7 @@
 // 스토리 미리보기: 검정 배경 + 카드 -2deg 회전
 .storyPreview {
   width: 100%;
-  background: #0A0A0A;
+  background: #0a0a0a;
   border-radius: $radius;
   padding: 28px 18px;
   display: flex;

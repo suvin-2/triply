@@ -1,9 +1,9 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
 .screen {
   position: absolute;
   inset: 0;
-  padding-top: 54px;
+  padding-top: 20px;
   padding-bottom: 36px;
   background: $card;
   color: $ink;
@@ -127,7 +127,7 @@
 
   // 날짜 미선택 시 hint 텍스트를 muted 색상으로
   &:not([value]),
-  &[value=''] {
+  &[value=""] {
     color: $mute;
   }
 }
