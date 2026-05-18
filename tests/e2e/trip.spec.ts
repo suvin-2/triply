@@ -125,7 +125,7 @@ test('TC-050: 총 지출 / 1인 평균 계산 표시', async ({ page }) => {
 /* TC-045: 카테고리 필터 */
 test('TC-045: 카테고리 필터 — 식사만 표시', async ({ page }) => {
   const roomId = await createTestRoom({ name: '필터테스트', members: ['A', 'B'] })
-  await addExpenseToRoom(roomId, { title: '흑돼지', amount: 50000, paidBy: 'A', splitWith: ['A', 'B'], category: '식사' })
+  await addExpenseToRoom(roomId, { title: '저녁 식사', amount: 50000, paidBy: 'A', splitWith: ['A', 'B'], category: '식사' })
   await addExpenseToRoom(roomId, { title: '택시', amount: 20000, paidBy: 'B', splitWith: ['A', 'B'], category: '교통' })
 
   await page.addInitScript((id) => {
@@ -133,10 +133,10 @@ test('TC-045: 카테고리 필터 — 식사만 표시', async ({ page }) => {
     localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
   await page.goto(`/room/${roomId}`)
-  await expect(page.getByText('흑돼지')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByText('저녁 식사')).toBeVisible({ timeout: 10000 })
 
   await page.getByRole('button', { name: '식사' }).click()
-  await expect(page.getByText('흑돼지')).toBeVisible()
+  await expect(page.getByText('저녁 식사')).toBeVisible()
   await expect(page.getByText('택시')).not.toBeVisible()
 
   await deleteTestRoom(roomId)
@@ -145,7 +145,7 @@ test('TC-045: 카테고리 필터 — 식사만 표시', async ({ page }) => {
 /* TC-046: 전체 복귀 */
 test('TC-046: 카테고리 필터 → 전체 → 모두 표시', async ({ page }) => {
   const roomId = await createTestRoom({ name: '전체복귀테스트', members: ['A', 'B'] })
-  await addExpenseToRoom(roomId, { title: '흑돼지', amount: 50000, paidBy: 'A', splitWith: ['A', 'B'], category: '식사' })
+  await addExpenseToRoom(roomId, { title: '저녁 식사', amount: 50000, paidBy: 'A', splitWith: ['A', 'B'], category: '식사' })
   await addExpenseToRoom(roomId, { title: '택시', amount: 20000, paidBy: 'B', splitWith: ['A', 'B'], category: '교통' })
 
   await page.addInitScript((id) => {
@@ -153,11 +153,11 @@ test('TC-046: 카테고리 필터 → 전체 → 모두 표시', async ({ page }
     localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
   await page.goto(`/room/${roomId}`)
-  await expect(page.getByText('흑돼지')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByText('저녁 식사')).toBeVisible({ timeout: 10000 })
 
   await page.getByRole('button', { name: '식사' }).click()
   await page.getByRole('button', { name: '전체' }).click()
-  await expect(page.getByText('흑돼지')).toBeVisible()
+  await expect(page.getByText('저녁 식사')).toBeVisible()
   await expect(page.getByText('택시')).toBeVisible()
 
   await deleteTestRoom(roomId)

@@ -23,20 +23,20 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
 
   /* TC-060: 바텀시트 열기 */
   test('TC-060: FAB 클릭 후 바텀시트 표시', async ({ page }) => {
-    await expect(page.getByPlaceholder(/흑돼지|렌터카/)).toBeVisible()
+    await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).toBeVisible()
   })
 
   /* TC-061: 오버레이 클릭 → 닫힘 */
   test('TC-061: 오버레이 배경 클릭 → 바텀시트 닫힘', async ({ page }) => {
     // overlay의 onClick(onClose)을 직접 dispatchEvent로 트리거
     await page.locator('[class*="overlay"]').first().dispatchEvent('click')
-    await expect(page.getByPlaceholder(/흑돼지|렌터카/)).not.toBeVisible({ timeout: 3000 })
+    await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).not.toBeVisible({ timeout: 3000 })
   })
 
   /* TC-062: X 버튼 클릭 → 닫힘 */
   test('TC-062: X 버튼 클릭 → 바텀시트 닫힘', async ({ page }) => {
     await page.getByRole('button', { name: '닫기' }).click()
-    await expect(page.getByPlaceholder(/흑돼지|렌터카/)).not.toBeVisible()
+    await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).not.toBeVisible()
   })
 
   /* TC-063: 키패드 숫자 입력 */
@@ -112,7 +112,7 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
   /* TC-163: 참여 인원 0명 → 비활성화 */
   test('TC-163: 참여 인원 0명 → 추가 버튼 비활성화', async ({ page }) => {
     await page.getByRole('button', { name: '5' }).first().click()
-    await page.getByPlaceholder(/흑돼지|렌터카/).fill('테스트')
+    await page.getByPlaceholder(/저녁 식사|렌터카/).fill('테스트')
     await page.getByRole('button', { name: '전체 해제' }).click()
     await expect(page.locator('[class*="submitBtn"]')).toBeDisabled()
   })
@@ -126,7 +126,7 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
     await page.getByRole('button', { name: '0' }).first().click()
     await page.getByRole('button', { name: '0' }).first().click()
     await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByPlaceholder(/흑돼지|렌터카/).fill('점심')
+    await page.getByPlaceholder(/저녁 식사|렌터카/).fill('점심')
     // 금액+항목명 있으면: "{금액}원 추가하기"
     await expect(page.locator('[class*="submitBtn"]')).toContainText('추가하기')
   })
@@ -135,7 +135,7 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
   test('TC-172: 바텀시트 내부 클릭 → 닫히지 않음', async ({ page }) => {
     const sheet = page.locator('[class*="sheet"]').first()
     await sheet.click({ position: { x: 100, y: 100 } })
-    await expect(page.getByPlaceholder(/흑돼지|렌터카/)).toBeVisible()
+    await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).toBeVisible()
   })
 
   /* TC-072: 지출 추가 제출 → Firebase 저장 후 바텀시트 닫힘 */
@@ -144,15 +144,15 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
     await page.getByRole('button', { name: '0' }).first().click()
     await page.getByRole('button', { name: '0' }).first().click()
     await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByPlaceholder(/흑돼지|렌터카/).fill('제주도 흑돼지')
+    await page.getByPlaceholder(/저녁 식사|렌터카/).fill('저녁 식사')
 
     const submitBtn = page.locator('[class*="submitBtn"]')
     await expect(submitBtn).not.toBeDisabled()
     await submitBtn.click()
 
     // 바텀시트 닫힘
-    await expect(page.getByPlaceholder(/흑돼지|렌터카/)).not.toBeVisible({ timeout: 5000 })
+    await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).not.toBeVisible({ timeout: 5000 })
     // 지출 목록에 추가됨
-    await expect(page.getByText('제주도 흑돼지')).toBeVisible()
+    await expect(page.getByText('저녁 식사')).toBeVisible()
   })
 })
