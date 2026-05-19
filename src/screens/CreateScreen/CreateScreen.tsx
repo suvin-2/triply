@@ -22,6 +22,7 @@ export default function CreateScreen() {
   const [endDate, setEndDate] = useState('');
   const [members, setMembers] = useState<string[]>([]);
   const [memberInput, setMemberInput] = useState('');
+  // isComposing: 한글 IME 조합 중 Enter 이벤트 중복 방지 (nativeEvent가 더 신뢰할 수 있어 state는 fallback용)
   const [isComposing, setIsComposing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
@@ -39,6 +40,8 @@ export default function CreateScreen() {
     : '';
 
   function addMember() {
+    // maxLength={10}은 이름 글자수 제한이고, 이 체크는 배열 길이(최대 인원) 제한
+    if (members.length >= 10) return;
     const v = memberInput.trim();
     if (!v || members.includes(v)) return;
     setMembers((prev) => [...prev, v]);
@@ -179,15 +182,23 @@ export default function CreateScreen() {
               onChange={(e) => setMemberInput(e.target.value)}
               onCompositionStart={() => setIsComposing(true)}
               onCompositionEnd={() => setIsComposing(false)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !isComposing) addMember(); }}
+              onKeyDown={(e) => {
+                // nativeEvent.isComposing은 브라우저 동기 값이므로 state보다 신뢰도 높음
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing && !isComposing) addMember();
+              }}
               placeholder="이름 입력 후 엔터"
               maxLength={10}
+              disabled={members.length >= 10}
             />
-            <button className={s.addBtn} onClick={addMember}>
+            <button className={s.addBtn} onClick={addMember} disabled={members.length >= 10}>
               + 추가
             </button>
           </div>
-          <CharCounter current={memberInput.length} max={10} />
+          {members.length >= 10 ? (
+            <p className={s.limitMsg}>최대 10명까지 추가할 수 있어요</p>
+          ) : (
+            <CharCounter current={memberInput.length} max={10} />
+          )}
         </div>
 
         <div className={s.formBottom} />

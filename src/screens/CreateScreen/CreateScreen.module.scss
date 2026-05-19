@@ -209,6 +209,17 @@
   border-radius: $radius;
   color: $ink;
   white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.limitMsg {
+  font-size: 11px;
+  color: $accent;
+  margin-top: 6px;
 }
 
 .formBottom {
