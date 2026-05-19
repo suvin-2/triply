@@ -90,6 +90,16 @@
 .amountBlock {
   padding: 28px 0 8px;
   text-align: center;
+  cursor: text;
+}
+
+// 네이티브 키패드를 올리는 투명 input — 시각적으로 숨기되 접근성 유지
+.amountInput {
+  opacity: 0;
+  position: absolute;
+  height: 0;
+  width: 0;
+  pointer-events: none;
 }
 
 .amountDisplay {
@@ -129,7 +139,7 @@
 
 // ─── 필드 섹션 ───────────────────────────────────────────────
 .fieldSection {
-  padding: 16px 0 14px;
+  padding: 16px 0 8px;
   border-bottom: 1px solid $line;
 }
 
@@ -206,6 +216,8 @@
   cursor: pointer;
   font-family: inherit;
   transition: background 0.12s, color 0.12s;
+  max-width: 120px;
+  overflow: hidden;
 
   &.active {
     background: $ink;
@@ -270,11 +282,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .participantName {
   font-size: 14px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
 }
 
 .checkbox {
@@ -301,45 +318,12 @@
   height: 24px;
 }
 
-// ─── 커스텀 키패드 ───────────────────────────────────────────
-.keypad {
-  border-top: 1px solid $ink;
-  padding: 12px 12px 0;
-  background: #faf8f2;
-  flex-shrink: 0;
-}
-
-.keypadGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
-}
-
-.keyBtn {
-  padding: 14px 0;
-  background: transparent;
-  border: none;
-  font-family: $font-mono;
-  font-size: 22px;
-  font-weight: 500;
-  cursor: pointer;
-  color: $ink;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius;
-  transition: background 0.1s;
-
-  &:active {
-    background: rgba(10, 10, 10, 0.06);
-  }
-}
-
 // ─── 저장 버튼 ───────────────────────────────────────────────
 .submitBar {
   padding: 8px 12px 12px;
-  background: #faf8f2;
+  background: $card;
   flex-shrink: 0;
+  border-top: 1px solid $line;
 }
 
 .submitBtn {

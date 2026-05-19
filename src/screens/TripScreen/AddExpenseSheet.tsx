@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ref, push } from 'firebase/database';
 import { db } from '../../lib/firebase';
 import { Avatar, Caps, Chevron } from '../../components/shared/atoms';
 import CharCounter from '../../components/shared/CharCounter';
-import { fmt } from '../../utils/format';
+import { fmt, amountFontSize } from '../../utils/format';
 import { CATEGORIES } from '../../types';
 import type { RoomWithExpenses, ExpenseCategory } from '../../types';
 import s from './AddExpenseSheet.module.scss';
@@ -16,7 +16,7 @@ interface Props {
 /**
  * 4본 — 지출 추가 바텀시트.
  * TripScreen 위에 88% 높이로 슬라이드업 렌더링된다.
- * 커스텀 키패드로 금액을 입력하고, Firebase에 지출을 저장한다.
+ * 네이티브 숫자 키패드로 금액을 입력하고, Firebase에 지출을 저장한다.
  */
 export default function AddExpenseSheet({ room, onClose }: Props) {
   const [visible, setVisible] = useState(false);
@@ -26,6 +26,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
   const [splitWith, setSplitWith] = useState<string[]>([...room.members]);
   const [category, setCategory] = useState<ExpenseCategory>('식사');
   const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // mount 후 10ms 뒤 visible=true → CSS 트랜지션 실행
   useEffect(() => {
@@ -40,27 +41,12 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
   const canSubmit = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
   const allSelected = splitWith.length === room.members.length;
 
-  // ─── 커스텀 키패드 입력 처리 ─────────────────────────────
-  function pressKey(key: string) {
-    if (key === 'del') {
-      setAmount((prev) => prev.slice(0, -1));
-      return;
-    }
-    // '00'은 값이 이미 있을 때만 추가 (0000 방지)
-    if (key === '00') {
-      setAmount((prev) => {
-        if (prev === '') return '';
-        // 상한 초과 시 무시
-        const next = parseInt(prev + '00', 10);
-        return next > MAX_AMOUNT ? prev : prev + '00';
-      });
-      return;
-    }
-    // 앞자리 0 제거 후 추가, 상한 초과 시 무시
-    setAmount((prev) => {
-      const next = (prev + key).replace(/^0+/, '') || '0';
-      return parseInt(next, 10) > MAX_AMOUNT ? prev : next;
-    });
+  function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value.replace(/\D/g, '');
+    if (raw === '') { setAmount(''); return; }
+    const num = parseInt(raw, 10);
+    if (num > MAX_AMOUNT) return;
+    setAmount(String(num));
   }
 
   function toggleParticipant(member: string) {
@@ -94,8 +80,6 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
     }
   }
 
-  const KEYPAD = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'del'] as const;
-
   return (
     <div
       className={`${s.overlay} ${visible ? s.visible : ''}`}
@@ -125,9 +109,22 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
 
         {/* 스크롤 영역 */}
         <div className={s.scrollArea}>
-          {/* 금액 — 히어로 디스플레이 */}
-          <div className={s.amountBlock}>
-            <div className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}>
+          {/* 금액 — 히어로 디스플레이 (탭하면 네이티브 키패드 올라옴) */}
+          <div className={s.amountBlock} onClick={() => inputRef.current?.focus()}>
+            <input
+              ref={inputRef}
+              className={s.amountInput}
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={amount}
+              onChange={handleAmountChange}
+              aria-label="금액 입력"
+            />
+            <div
+              className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}
+              style={{ fontSize: numAmount > 0 ? amountFontSize(numAmount, 56) : undefined }}
+            >
               {numAmount === 0 ? '0' : fmt(numAmount)}
               <span className={s.amountUnit}>원</span>
             </div>
@@ -179,7 +176,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
                   onClick={() => setPaidBy(member)}
                 >
                   <Avatar name={member} size={22} dark={paidBy !== member} />
-                  {member}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member}</span>
                 </button>
               ))}
             </div>
@@ -229,35 +226,6 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
           </div>
         </div>
 
-        {/* 커스텀 숫자 키패드 */}
-        <div className={s.keypad}>
-          <div className={s.keypadGrid}>
-            {KEYPAD.map((key) => (
-              <button key={key} className={s.keyBtn} onClick={() => pressKey(key)}>
-                {key === 'del' ? (
-                  // 백스페이스 아이콘
-                  <svg width="22" height="16" viewBox="0 0 22 16">
-                    <path
-                      d="M7 1h13a2 2 0 012 2v10a2 2 0 01-2 2H7L1 8 7 1z"
-                      fill="none"
-                      stroke="#0A0A0A"
-                      strokeWidth="1.4"
-                    />
-                    <path
-                      d="M10 5l6 6M16 5l-6 6"
-                      stroke="#0A0A0A"
-                      strokeWidth="1.4"
-                      strokeLinecap="square"
-                    />
-                  </svg>
-                ) : (
-                  key
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* 제출 버튼 */}
         <div className={s.submitBar}>
           <button
@@ -265,13 +233,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             onClick={handleSubmit}
             disabled={!canSubmit || submitting}
           >
-            <span>
-              {submitting
-                ? '추가 중...'
-                : canSubmit
-                  ? `${fmt(numAmount)}원 추가하기`
-                  : '항목명 · 금액 입력'}
-            </span>
+            <span>{submitting ? '추가 중...' : '지출 입력'}</span>
             <Chevron dir="right" size={14} color="#fff" />
           </button>
         </div>
