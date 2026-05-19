@@ -101,7 +101,7 @@ test('TC-B04: 지출 항목명 20자 → CharCounter 확인', async ({ page }) =
 /* ───────────────────────────────────────────────────────────────────
    TC-B05: 금액 9,999,900원 입력 → 키패드/금액 디스플레이 확인
 ─────────────────────────────────────────────────────────────────── */
-test('TC-B05: 금액 9,999,900원 입력 → 키패드 표시 확인', async ({ page }) => {
+test('TC-B05: 금액 9,999,900원 입력 → 금액 표시 확인', async ({ page }) => {
   const roomId = await createTestRoom({ name: '금액 경계값', members: ['A', 'B'] })
   createdRoomIds.push(roomId)
 
@@ -113,13 +113,10 @@ test('TC-B05: 금액 9,999,900원 입력 → 키패드 표시 확인', async ({ 
   await page.goto(`/room/${roomId}`)
   await page.waitForLoadState('networkidle')
   await page.getByRole('button', { name: '지출 추가' }).click()
-  await expect(page.locator('[class*="keypadGrid"]')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('[class*="amountBlock"]')).toBeVisible({ timeout: 5000 })
 
-  // 9,999,900 = 9 9 9 9 9 00
-  const keys = ['9', '9', '9', '9', '9', '00']
-  for (const key of keys) {
-    await page.getByRole('button', { name: key }).first().click()
-  }
+  await page.locator('[class*="amountBlock"]').click()
+  await page.keyboard.type('9999900')
 
   // 금액 디스플레이에 "9,999,900" 포함 여부
   await expect(page.locator('[class*="amountDisplay"]')).toContainText('9,999,900')
@@ -255,22 +252,21 @@ test('TC-B09: 금액 10,000,000원 초과 입력 차단 확인', async ({ page }
   await page.goto(`/room/${roomId}`)
   await page.waitForLoadState('networkidle')
   await page.getByRole('button', { name: '지출 추가' }).click()
-  await expect(page.locator('[class*="keypadGrid"]')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('[class*="amountBlock"]')).toBeVisible({ timeout: 5000 })
 
-  // 9,999,999 입력 후 추가로 1 입력 시 차단 → 9,999,999 유지
-  const keysToMax = ['9', '9', '9', '9', '9', '9', '9']
-  for (const key of keysToMax) {
-    await page.getByRole('button', { name: key }).first().click()
-  }
+  await page.locator('[class*="amountBlock"]').click()
+
+  // 9,999,999 입력
+  await page.keyboard.type('9999999')
   await expect(page.locator('[class*="amountDisplay"]')).toContainText('9,999,999')
 
-  // 1 추가 입력 → 10,000,000 미만이므로 허용
-  await page.getByRole('button', { name: '1' }).first().click()
+  // 1 추가 입력 → 99,999,991 > MAX_AMOUNT → 차단
+  await page.keyboard.type('1')
   await expect(page.locator('[class*="amountDisplay"]')).not.toContainText('99,999,991')
 
-  // 10,000,001이 되는 입력 차단 — 1키 클릭 시 값이 변하지 않아야 함
+  // 추가 입력 차단 — 값이 변하지 않아야 함
   const before = await page.locator('[class*="amountDisplay"]').textContent()
-  await page.getByRole('button', { name: '1' }).first().click()
+  await page.keyboard.type('1')
   const after = await page.locator('[class*="amountDisplay"]').textContent()
   expect(before).toBe(after)
 

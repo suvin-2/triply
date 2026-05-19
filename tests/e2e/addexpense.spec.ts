@@ -39,23 +39,18 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
     await expect(page.getByPlaceholder(/저녁 식사|렌터카/)).not.toBeVisible()
   })
 
-  /* TC-063: 키패드 숫자 입력 */
-  test('TC-063: 키패드 숫자 입력 → 금액 표시', async ({ page }) => {
-    // keyBtn 클래스로 정확히 키패드 버튼 선택 (순서: 1,2,3,4,5,6,7,8,9,00,0,del)
-    const keyBtns = page.locator('[class*="keyBtn"]')
-    await keyBtns.nth(0).click() // 1
-    await keyBtns.nth(1).click() // 2
-    await keyBtns.nth(2).click() // 3
+  /* TC-063: 금액 입력 */
+  test('TC-063: 금액 입력 → 금액 표시', async ({ page }) => {
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('123')
     await expect(page.locator('[class*="amountDisplay"]')).toContainText('123')
   })
 
-  /* TC-064: 키패드 DEL */
-  test('TC-064: DEL 버튼 → 마지막 자리 삭제', async ({ page }) => {
-    await page.getByRole('button', { name: '5' }).first().click()
-    await page.getByRole('button', { name: '6' }).first().click()
-    // DEL 버튼 클릭 (svg 포함)
-    const delBtn = page.locator('[class*="keyBtn"]').last()
-    await delBtn.click()
+  /* TC-064: 백스페이스 */
+  test('TC-064: 백스페이스 → 마지막 자리 삭제', async ({ page }) => {
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('56')
+    await page.keyboard.press('Backspace')
     await expect(page.locator('[class*="amountDisplay"]')).toContainText('5')
   })
 
@@ -100,35 +95,37 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
 
   /* TC-161: 금액 0일 때 추가 버튼 비활성화 */
   test('TC-161: 금액 0 → 추가하기 버튼 비활성화', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /항목명 · 금액 입력/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /지출 입력/ })).toBeDisabled()
   })
 
   /* TC-162: 항목명 없을 때 비활성화 */
   test('TC-162: 항목명 없고 금액만 있을 때 → 비활성화', async ({ page }) => {
-    await page.getByRole('button', { name: '5' }).first().click()
-    await expect(page.getByRole('button', { name: /항목명 · 금액 입력/ })).toBeDisabled()
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('5')
+    await expect(page.getByRole('button', { name: /지출 입력/ })).toBeDisabled()
   })
 
   /* TC-163: 참여 인원 0명 → 비활성화 */
   test('TC-163: 참여 인원 0명 → 추가 버튼 비활성화', async ({ page }) => {
-    await page.getByRole('button', { name: '5' }).first().click()
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('5')
     await page.getByPlaceholder(/저녁 식사|렌터카/).fill('테스트')
     await page.getByRole('button', { name: '전체 해제' }).click()
     await expect(page.locator('[class*="submitBtn"]')).toBeDisabled()
   })
 
   /* TC-171: 버튼 텍스트 상태 */
-  test('TC-171: 금액+항목명 입력 시 버튼 텍스트 변경', async ({ page }) => {
-    // 초기: "항목명 · 금액 입력"
-    await expect(page.locator('[class*="submitBtn"]')).toContainText('항목명 · 금액 입력')
+  test('TC-171: 금액+항목명 입력 시 버튼 활성화', async ({ page }) => {
+    // 초기: "지출 입력" (disabled)
+    await expect(page.locator('[class*="submitBtn"]')).toContainText('지출 입력')
+    await expect(page.locator('[class*="submitBtn"]')).toBeDisabled()
 
-    await page.getByRole('button', { name: '5' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('5000')
     await page.getByPlaceholder(/저녁 식사|렌터카/).fill('점심')
-    // 금액+항목명 있으면: "{금액}원 추가하기"
-    await expect(page.locator('[class*="submitBtn"]')).toContainText('추가하기')
+    // 금액+항목명 있으면 버튼 활성화
+    await expect(page.locator('[class*="submitBtn"]')).not.toBeDisabled()
+    await expect(page.locator('[class*="submitBtn"]')).toContainText('지출 입력')
   })
 
   /* TC-172: 바텀시트 내부 클릭 → 닫히지 않음 */
@@ -140,10 +137,8 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
 
   /* TC-072: 지출 추가 제출 → Firebase 저장 후 바텀시트 닫힘 */
   test('TC-072: 지출 추가 제출 → 성공 후 목록 업데이트', async ({ page }) => {
-    await page.getByRole('button', { name: '5' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
-    await page.getByRole('button', { name: '0' }).first().click()
+    await page.locator('[class*="amountBlock"]').click()
+    await page.keyboard.type('5000')
     await page.getByPlaceholder(/저녁 식사|렌터카/).fill('저녁 식사')
 
     const submitBtn = page.locator('[class*="submitBtn"]')
