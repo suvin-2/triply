@@ -49,7 +49,6 @@ test('TC-B02: 인원 10명 → RoomCard AvatarStack 표시 확인', async ({ pag
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'Alice')
   }, roomId)
 
   await page.goto('/')
@@ -81,7 +80,6 @@ test('TC-B04: 지출 항목명 20자 → CharCounter 확인', async ({ page }) =
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}`)
@@ -107,7 +105,6 @@ test('TC-B05: 금액 9,999,900원 입력 → 금액 표시 확인', async ({ pag
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}`)
@@ -149,7 +146,6 @@ test('TC-B06: 지출 200건 → 목록 스크롤 성능 확인', async ({ page }
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}`)
@@ -195,7 +191,6 @@ test('TC-B07: 인원 10명 정산 → 송금 내역 표시 확인', async ({ pag
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}/settle`)
@@ -227,7 +222,6 @@ test('TC-B08: 지출 15건 → 영수증 카드 "외 N건 더" 표시 확인', a
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}/settle`)
@@ -246,7 +240,6 @@ test('TC-B09: 금액 10,000,000원 초과 입력 차단 확인', async ({ page }
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}`)
@@ -291,7 +284,6 @@ test('TC-B10: 정산 완료 방 → FAB 숨김 + 안내 텍스트 확인', async
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}`)
@@ -322,7 +314,6 @@ test('TC-B11: 정산 완료 취소하기 → TripScreen 복귀 확인', async ({
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
 
   await page.goto(`/room/${roomId}/settle`)

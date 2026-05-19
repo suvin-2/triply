@@ -43,7 +43,7 @@ test.describe('방 개설 화면 — TC-020~031', () => {
     await page.getByRole('button', { name: '+ 추가' }).click()
     await page.getByPlaceholder('이름 입력 후 엔터').fill('B')
     await page.getByRole('button', { name: '+ 추가' }).click()
-    await expect(page.getByRole('button', { name: /방 만들고 링크 공유/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /방 만들고 코드 공유/ })).toBeDisabled()
   })
 
   /* TC-122: 인원 1명 → 버튼 비활성화 */
@@ -51,13 +51,13 @@ test.describe('방 개설 화면 — TC-020~031', () => {
     await page.getByPlaceholder('제주 3박 4일').fill('테스트 여행')
     await page.getByPlaceholder('이름 입력 후 엔터').fill('A')
     await page.getByRole('button', { name: '+ 추가' }).click()
-    await expect(page.getByRole('button', { name: /방 만들고 링크 공유/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /방 만들고 코드 공유/ })).toBeDisabled()
   })
 
   /* TC-123: 인원 0명 → 버튼 비활성화 */
   test('TC-123: 인원 없으면 버튼 비활성화', async ({ page }) => {
     await page.getByPlaceholder('제주 3박 4일').fill('테스트 여행')
-    await expect(page.getByRole('button', { name: /방 만들고 링크 공유/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /방 만들고 코드 공유/ })).toBeDisabled()
   })
 
   /* TC-124: 종료일이 시작일보다 이른 경우 */
@@ -74,7 +74,7 @@ test.describe('방 개설 화면 — TC-020~031', () => {
     await dateInputs.nth(1).fill('2025-05-08')
 
     await expect(page.getByText(/종료일이 시작일보다 이를 수 없어요/)).toBeVisible()
-    await expect(page.getByRole('button', { name: /방 만들고 링크 공유/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /방 만들고 코드 공유/ })).toBeDisabled()
   })
 
   /* TC-125: 중복 이름 추가 안됨 */
@@ -107,11 +107,11 @@ test.describe('방 개설 화면 — Firebase 연동 (TC-024~031)', () => {
     await page.getByPlaceholder('이름 입력 후 엔터').fill('지민')
     await page.getByRole('button', { name: '+ 추가' }).click()
 
-    await page.getByRole('button', { name: /방 만들고 링크 공유/ }).click()
+    await page.getByRole('button', { name: /방 만들고 코드 공유/ }).click()
 
     // 오버레이 표시 대기 (Firebase 저장 시간 포함)
     await expect(page.getByText('방이 만들어졌어요!')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText(/아래 링크를 친구들에게/)).toBeVisible()
+    await expect(page.getByText(/아래 초대 코드를/)).toBeVisible()
   })
 
   /* TC-027: 링크 복사 버튼 */
@@ -125,7 +125,7 @@ test.describe('방 개설 화면 — Firebase 연동 (TC-024~031)', () => {
     await page.getByPlaceholder('이름 입력 후 엔터').fill('B')
     await page.getByRole('button', { name: '+ 추가' }).click()
 
-    await page.getByRole('button', { name: /방 만들고 링크 공유/ }).click()
+    await page.getByRole('button', { name: /방 만들고 코드 공유/ }).click()
     await expect(page.getByText('방이 만들어졌어요!')).toBeVisible({ timeout: 10000 })
 
     await page.getByRole('button', { name: '복사' }).click()
@@ -142,7 +142,7 @@ test.describe('방 개설 화면 — Firebase 연동 (TC-024~031)', () => {
     await page.getByPlaceholder('이름 입력 후 엔터').fill('B')
     await page.getByRole('button', { name: '+ 추가' }).click()
 
-    await page.getByRole('button', { name: /방 만들고 링크 공유/ }).click()
+    await page.getByRole('button', { name: /방 만들고 코드 공유/ }).click()
     await expect(page.getByText('방이 만들어졌어요!')).toBeVisible({ timeout: 10000 })
 
     await page.getByRole('button', { name: /여행 시작하기/ }).click()
@@ -160,7 +160,7 @@ test.describe('방 개설 화면 — Firebase 연동 (TC-024~031)', () => {
     await page.getByPlaceholder('이름 입력 후 엔터').fill('B')
     await page.getByRole('button', { name: '+ 추가' }).click()
 
-    await page.getByRole('button', { name: /방 만들고 링크 공유/ }).click()
+    await page.getByRole('button', { name: /방 만들고 코드 공유/ }).click()
     await expect(page.getByText('방이 만들어졌어요!')).toBeVisible({ timeout: 10000 })
 
     await page.getByRole('button', { name: '복사' }).click()

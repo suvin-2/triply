@@ -23,7 +23,6 @@ test.describe('정산 결과 화면 — TC-080~094', () => {
     })
     await page.addInitScript((id) => {
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, roomId)
     await page.goto(`/room/${roomId}/settle`)
     await expect(page.getByText('정산테스트방')).toBeVisible({ timeout: 10000 })
@@ -120,7 +119,6 @@ test('TC-094: 균등 분담 → 정산 불필요 메시지', async ({ page }) =>
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
   await page.goto(`/room/${roomId}/settle`)
 
@@ -136,7 +134,6 @@ test('TC-181: done 방 — 완료 버튼 비활성화', async ({ page }) => {
 
   await page.addInitScript((id) => {
     localStorage.setItem('triply_rooms', JSON.stringify([id]))
-    localStorage.setItem(`triply_name_${id}`, 'A')
   }, roomId)
   await page.goto(`/room/${roomId}/settle`)
 

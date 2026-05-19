@@ -27,7 +27,6 @@ test.describe('숨김/복원/삭제 — TC-500~504', () => {
     const roomId = await createTestRoom({ name: '숨길여행', members: ['A', 'B'] })
     await page.addInitScript((id) => {
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, roomId)
     await page.goto(`/room/${roomId}`)
     await page.getByRole('button', { name: '메뉴' }).click()
@@ -72,7 +71,6 @@ test.describe('숨김/복원/삭제 — TC-500~504', () => {
       const [id, token] = args
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
       localStorage.setItem(`triply_owner_${id}`, token)
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, [roomId, OWNER_TOKEN])
     await page.goto(`/room/${roomId}`)
     await page.getByRole('button', { name: '메뉴' }).click()
@@ -91,7 +89,6 @@ test.describe('숨김/복원/삭제 — TC-500~504', () => {
     await page.addInitScript((id) => {
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
       // ownerToken 저장 안함 → 참여자
-      localStorage.setItem(`triply_name_${id}`, 'B')
     }, roomId)
     await page.goto(`/room/${roomId}`)
     await page.getByRole('button', { name: '메뉴' }).click()
@@ -112,7 +109,6 @@ test.describe('숨김/복원/삭제 — TC-500~504', () => {
       const [id, token] = args
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
       localStorage.setItem(`triply_owner_${id}`, token)
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, [roomId, OWNER_TOKEN])
     await page.goto(`/room/${roomId}`)
     await page.getByRole('button', { name: '메뉴' }).click()
@@ -132,7 +128,6 @@ test.describe('숨김/복원/삭제 — TC-500~504', () => {
       const [id, token] = args
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
       localStorage.setItem(`triply_owner_${id}`, token)
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, [roomId, OWNER_TOKEN])
     await page.goto(`/room/${roomId}`)
 

@@ -1,5 +1,12 @@
 const DB_URL = 'https://triply-22680-default-rtdb.firebaseio.com';
 
+const INVITE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function generateInviteCode(): string {
+  return Array.from({ length: 8 }, () =>
+    INVITE_CHARS[Math.floor(Math.random() * INVITE_CHARS.length)],
+  ).join('');
+}
+
 export interface TestRoomData {
   name: string;
   members: string[];
@@ -7,6 +14,7 @@ export interface TestRoomData {
   startDate?: string;
   endDate?: string;
   ownerToken?: string;
+  inviteCode?: string;
 }
 
 export interface TestExpense {
@@ -18,6 +26,7 @@ export interface TestExpense {
 }
 
 export async function createTestRoom(data: TestRoomData): Promise<string> {
+  const code = data.inviteCode ?? generateInviteCode();
   const res = await fetch(`${DB_URL}/rooms.json`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -28,6 +37,7 @@ export async function createTestRoom(data: TestRoomData): Promise<string> {
       startDate: data.startDate ?? '',
       endDate: data.endDate ?? '',
       createdAt: Date.now(),
+      inviteCode: code,
       ...(data.ownerToken ? { ownerToken: data.ownerToken } : {}),
     }),
   });

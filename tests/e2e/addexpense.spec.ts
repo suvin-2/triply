@@ -8,7 +8,6 @@ test.describe('지출 추가 바텀시트 — TC-060~073', () => {
     roomId = await createTestRoom({ name: '지출추가테스트', members: ['A', 'B', 'C'] })
     await page.addInitScript((id) => {
       localStorage.setItem('triply_rooms', JSON.stringify([id]))
-      localStorage.setItem(`triply_name_${id}`, 'A')
     }, roomId)
     await page.goto(`/room/${roomId}`)
     await expect(page.getByText('지출추가테스트')).toBeVisible({ timeout: 10000 })

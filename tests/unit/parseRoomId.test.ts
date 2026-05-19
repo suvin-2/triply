@@ -1,40 +1,58 @@
 import { describe, it, expect } from 'vitest'
 import { parseRoomId } from '../../src/utils/parseRoomId'
 
-describe('parseRoomId', () => {
-  describe('전체 URL 입력', () => {
-    it('표준 URL에서 roomId 추출', () => {
-      expect(parseRoomId('https://triply.vercel.app/room/abc123')).toBe('abc123')
+describe('parseRoomId — 8자리 초대 코드 검증', () => {
+  describe('유효한 코드', () => {
+    it('유효한 8자리 코드 → 대문자 그대로 반환', () => {
+      expect(parseRoomId('ABCD2345')).toBe('ABCD2345')
     })
 
-    it('하이픈·언더스코어 포함 roomId 추출', () => {
-      expect(parseRoomId('https://triply.vercel.app/room/room-id_01')).toBe('room-id_01')
+    it('소문자 입력 → 대문자로 변환하여 반환', () => {
+      expect(parseRoomId('abcd2345')).toBe('ABCD2345')
     })
 
-    it('localhost URL에서도 추출', () => {
-      expect(parseRoomId('http://localhost:5173/room/xyz789')).toBe('xyz789')
-    })
-
-    it('/room/ 경로가 없는 URL은 null 반환', () => {
-      expect(parseRoomId('https://triply.vercel.app/invalid/abc123')).toBeNull()
-    })
-  })
-
-  describe('roomId 직접 입력', () => {
-    it('영문 소문자만 있는 roomId', () => {
-      expect(parseRoomId('abc123')).toBe('abc123')
-    })
-
-    it('영문 대소문자·숫자·하이픈·언더스코어 혼합', () => {
-      expect(parseRoomId('Room_ID-01')).toBe('Room_ID-01')
+    it('대소문자 혼합 입력 → 대문자로 변환', () => {
+      expect(parseRoomId('AbCd2345')).toBe('ABCD2345')
     })
 
     it('앞뒤 공백 있어도 trim 후 처리', () => {
-      expect(parseRoomId('  abc123  ')).toBe('abc123')
+      expect(parseRoomId('  ABCD2345  ')).toBe('ABCD2345')
+    })
+
+    it('허용 문자 전체 범위 포함 코드', () => {
+      expect(parseRoomId('ZYXW9876')).toBe('ZYXW9876')
     })
   })
 
-  describe('빈 값 / 유효하지 않은 값 → null 반환', () => {
+  describe('금지 문자 포함 → null 반환', () => {
+    it('I 포함 → null', () => {
+      expect(parseRoomId('ABCDI234')).toBeNull()
+    })
+
+    it('O 포함 → null', () => {
+      expect(parseRoomId('ABCDO234')).toBeNull()
+    })
+
+    it('0 포함 → null', () => {
+      expect(parseRoomId('ABCD0234')).toBeNull()
+    })
+
+    it('1 포함 → null', () => {
+      expect(parseRoomId('ABCD1234')).toBeNull()
+    })
+  })
+
+  describe('길이 불일치 → null 반환', () => {
+    it('7자리 → null', () => {
+      expect(parseRoomId('ABCD234')).toBeNull()
+    })
+
+    it('9자리 → null', () => {
+      expect(parseRoomId('ABCD23456')).toBeNull()
+    })
+  })
+
+  describe('유효하지 않은 입력 → null 반환', () => {
     it('빈 문자열 → null', () => {
       expect(parseRoomId('')).toBeNull()
     })
@@ -44,15 +62,15 @@ describe('parseRoomId', () => {
     })
 
     it('한국어 포함 → null', () => {
-      expect(parseRoomId('방아이디123')).toBeNull()
+      expect(parseRoomId('방코드1234')).toBeNull()
     })
 
     it('특수문자 포함 → null', () => {
-      expect(parseRoomId('abc!@#')).toBeNull()
+      expect(parseRoomId('ABCD!@#$')).toBeNull()
     })
 
-    it('슬래시 포함된 비URL 입력 → null', () => {
-      expect(parseRoomId('abc/def')).toBeNull()
+    it('URL 형식 → null (더 이상 지원 안 함)', () => {
+      expect(parseRoomId('https://triply.vercel.app/room/abc123')).toBeNull()
     })
   })
 })
