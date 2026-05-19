@@ -14,6 +14,18 @@ export const fmtCompact = (n: number): string => {
 };
 
 /**
+ * 금액 자릿수에 따라 base font-size를 비율로 줄여 반환한다.
+ * 7자리 이하: base 그대로, 8자리: ×0.875, 9자리+: ×0.75
+ * (예: base=32 → 32 / 28 / 24px)
+ */
+export function amountFontSize(amount: number, base: number): number {
+  const digits = Math.floor(Math.abs(amount)).toString().length;
+  if (digits <= 7) return base;
+  if (digits === 8) return Math.round(base * 0.875);
+  return Math.round(base * 0.75);
+}
+
+/**
  * Unix timestamp(ms)를 "M.D HH:MM" 형태로 변환한다.
  * 지출 목록에서 날짜·시간을 간략히 표시할 때 사용한다.
  */

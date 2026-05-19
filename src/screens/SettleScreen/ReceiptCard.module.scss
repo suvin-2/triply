@@ -64,6 +64,9 @@ $receipt-line: #E5E0D6;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
+  max-width: 100%;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .tripDate {
@@ -132,6 +135,10 @@ $receipt-line: #E5E0D6;
   color: $receipt-mute;
   margin-top: 2px;
   letter-spacing: 0.04em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .itemAmount {
@@ -195,6 +202,7 @@ $receipt-line: #E5E0D6;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .perPersonRow {
@@ -244,6 +252,8 @@ $receipt-line: #E5E0D6;
 
 .settleAmount {
   font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 // ─── AUTH ────────────────────────────────────────────────────────

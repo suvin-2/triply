@@ -52,6 +52,7 @@
 
 .menuWrap {
   position: relative;
+  z-index: 200;
 }
 
 .menuBtn {
@@ -71,7 +72,7 @@
   border: 1px solid $line;
   border-radius: $radius;
   min-width: 150px;
-  z-index: 100;
+  z-index: 1000;
   overflow: hidden;
 }
 
@@ -189,8 +190,7 @@
 .tabContent {
   flex: 1;
   overflow-y: auto;
-  // 하단 버튼 높이만큼 여백 (bottomBar: absolute, 36px + 버튼 52px + 간격)
-  padding-bottom: 100px;
+  padding-bottom: 8px;
 }
 
 // ─── 송금 내역 탭 ─────────────────────────────────────────────────
@@ -380,11 +380,10 @@
 
 // ─── 하단 정산 완료 버튼 ──────────────────────────────────────────
 .bottomBar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 36px;
-  padding: 0 $screen-px;
+  flex-shrink: 0;
+  padding: 12px $screen-px 36px;
+  background: $card;
+  border-top: 1px solid $line;
 }
 
 .doneBtn {

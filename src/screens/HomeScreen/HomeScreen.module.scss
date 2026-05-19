@@ -4,7 +4,6 @@
   position: absolute;
   inset: 0;
   padding-top: 20px;
-  padding-bottom: 36px;
   background: $card;
   color: $ink;
   display: flex;
@@ -45,6 +44,7 @@
 
 .menuWrap {
   position: relative;
+  z-index: 200;
 }
 
 .menuBtn {
@@ -59,7 +59,7 @@
   border: 1px solid $line;
   border-radius: $radius;
   min-width: 140px;
-  z-index: 100;
+  z-index: 1000;
   overflow: hidden;
 }
 
@@ -245,9 +245,10 @@
 
 // ─── 하단 영역 ──────────────────────────────────────────────
 .bottom {
-  padding: 14px $screen-px 0;
+  padding: 14px $screen-px 36px;
   border-top: 1px solid $line;
   background: $card;
+  flex-shrink: 0;
 }
 
 .linkRow {
