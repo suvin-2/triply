@@ -1,12 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLocalRooms } from '../../hooks/useLocalRooms';
-import { useRooms } from '../../hooks/useRooms';
-import { useHiddenRooms } from '../../hooks/useHiddenRooms';
-import { parseRoomId } from '../../utils/parseRoomId';
-import { formatDateLabel } from '../../utils/formatDate';
-import { AvatarStack, Caps, Chevron } from '../../components/shared/atoms';
-import s from './HomeScreen.module.scss';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ref, query, get, orderByChild, equalTo } from "firebase/database";
+import { db } from "../../lib/firebase";
+import { useLocalRooms } from "../../hooks/useLocalRooms";
+import { useRooms } from "../../hooks/useRooms";
+import { useHiddenRooms } from "../../hooks/useHiddenRooms";
+import { parseRoomId } from "../../utils/parseRoomId";
+import { formatDateLabel } from "../../utils/formatDate";
+import { AvatarStack, Caps, Chevron } from "../../components/shared/atoms";
+import s from "./HomeScreen.module.scss";
 
 /**
  * 1본 — 홈 화면.
@@ -20,8 +22,9 @@ export default function HomeScreen() {
   const { rooms: allRooms } = useRooms(roomIds);
   const rooms = allRooms.filter((r) => !hiddenRoomIds.includes(r.id));
 
-  const [link, setLink] = useState('');
-  const [linkError, setLinkError] = useState('');
+  const [link, setLink] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [linkLoading, setLinkLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -33,31 +36,49 @@ export default function HomeScreen() {
         setMenuOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [menuOpen]);
 
-  const activeCount = rooms.filter((r) => r.status === 'active').length;
+  const activeCount = rooms.filter((r) => r.status === "active").length;
 
-  function handleLinkNavigate() {
-    // 빈 값(공백 포함)과 잘못된 형식 모두 동일하게 처리
+  async function handleLinkNavigate() {
+    if (linkLoading) return;
     const trimmed = link.trim();
     if (!trimmed) {
-      setLinkError('올바른 링크 또는 방 코드를 입력해주세요');
+      setLinkError("올바른 초대 코드를 입력해주세요");
       return;
     }
-    const roomId = parseRoomId(trimmed);
-    if (!roomId) {
-      setLinkError('올바른 링크 또는 방 코드를 입력해주세요');
+    const code = parseRoomId(trimmed);
+    if (!code) {
+      setLinkError("올바른 초대 코드를 입력해주세요");
       return;
     }
-    setLinkError('');
-    addRoomId(roomId);
-    navigate(`/room/${roomId}`);
+    setLinkLoading(true);
+    setLinkError("");
+    try {
+      const snapshot = await get(
+        query(ref(db, "rooms"), orderByChild("inviteCode"), equalTo(code)),
+      );
+      if (!snapshot.exists()) {
+        setLinkError("올바른 초대 코드를 입력해주세요");
+        return;
+      }
+      // Firebase snapshot.val()은 inviteCode 인덱스 쿼리 결과이므로 캐스팅
+      const rooms = snapshot.val() as Record<string, unknown>;
+      const roomId = Object.keys(rooms)[0];
+      addRoomId(roomId);
+      navigate(`/room/${roomId}`);
+    } catch (err) {
+      console.error("[HomeScreen] 초대 코드 조회 실패:", err);
+      setLinkError("올바른 초대 코드를 입력해주세요");
+    } finally {
+      setLinkLoading(false);
+    }
   }
 
   function handleLinkKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') handleLinkNavigate();
+    if (e.key === "Enter") handleLinkNavigate();
   }
 
   return (
@@ -85,7 +106,10 @@ export default function HomeScreen() {
               <div className={s.dropdown}>
                 <button
                   className={s.dropdownItem}
-                  onClick={() => { setMenuOpen(false); navigate('/hidden'); }}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate("/hidden");
+                  }}
                 >
                   숨긴 여행 보기
                 </button>
@@ -97,7 +121,7 @@ export default function HomeScreen() {
         <div className={s.titleBlock}>
           <h1 className={s.title}>MY TRIPS</h1>
           <p className={s.subtitle}>
-            진행 중인 여행{' '}
+            진행 중인 여행{" "}
             <strong className={s.subtitleBold}>{activeCount}</strong>건
           </p>
         </div>
@@ -113,8 +137,7 @@ export default function HomeScreen() {
         {rooms.length === 0 && (
           <div className={s.empty}>
             아직 여행이 없어요.
-            <br />
-            새 여행을 만들거나 초대 링크로 입장해보세요.
+            <br />새 여행을 만들거나 초대 코드로 입장해보세요.
           </div>
         )}
 
@@ -127,7 +150,7 @@ export default function HomeScreen() {
             <div className={s.roomRow}>
               <div className={s.roomLeft}>
                 <div className={s.roomNameRow}>
-                  {room.status === 'active' && <span className={s.liveDot} />}
+                  {room.status === "active" && <span className={s.liveDot} />}
                   <span className={s.roomName}>{room.name}</span>
                 </div>
                 <div className={s.roomMeta}>
@@ -136,7 +159,7 @@ export default function HomeScreen() {
                   </span>
                   <span className={s.metaDot} />
                   <AvatarStack names={room.members} size={18} max={4} />
-                  {room.status === 'active' ? (
+                  {room.status === "active" ? (
                     <span className={s.statusActive}>진행중</span>
                   ) : (
                     <span className={s.statusDone}>정산완료</span>
@@ -144,8 +167,10 @@ export default function HomeScreen() {
                 </div>
               </div>
 
-              <div className={s.roomRight}>
-                <div className={`mono ${s.memberCount}`}>{room.members.length}</div>
+              <div className={`${s.memberCountWrapper} 22222`}>
+                <div className={`mono ${s.memberCount}`}>
+                  {room.members.length}
+                </div>
                 <div className={s.memberLabel}>명</div>
               </div>
             </div>
@@ -161,23 +186,36 @@ export default function HomeScreen() {
             value={link}
             onChange={(e) => {
               setLink(e.target.value);
-              if (linkError) setLinkError('');
+              if (linkError) setLinkError("");
             }}
             onKeyDown={handleLinkKeyDown}
-            placeholder="초대 링크 붙여넣기"
+            placeholder="초대 코드 8자리 입력"
           />
           <button
             className={`${s.linkBtn} ${link.trim() ? s.hasInput : s.noInput}`}
             onClick={handleLinkNavigate}
-            aria-label="링크로 입장"
+            aria-label="코드로 입장"
+            disabled={linkLoading}
           >
-            <Chevron dir="right" size={14} color={link.trim() ? '#fff' : '#0A0A0A'} />
+            {linkLoading ? (
+              <span
+                style={{ fontSize: 11, fontFamily: "inherit", color: "#fff" }}
+              >
+                확인중
+              </span>
+            ) : (
+              <Chevron
+                dir="right"
+                size={14}
+                color={link.trim() ? "#fff" : "#0A0A0A"}
+              />
+            )}
           </button>
         </div>
 
         {linkError && <p className={s.linkError}>{linkError}</p>}
 
-        <button className={s.ctaBtn} onClick={() => navigate('/create')}>
+        <button className={s.ctaBtn} onClick={() => navigate("/create")}>
           <span>새 여행 만들기</span>
           <span className={s.ctaRight}>
             <span className={s.ctaTag}>NEW</span>

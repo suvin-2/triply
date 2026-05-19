@@ -293,6 +293,16 @@
   text-overflow: ellipsis;
 }
 
+.inviteCodeText {
+  flex: 1;
+  font-family: $font-mono;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: $ink;
+  text-align: center;
+}
+
 .copyBtn {
   font-size: 12px;
   font-weight: 600;

@@ -4,14 +4,16 @@ import { ref, push, set } from 'firebase/database';
 import { db } from '../../lib/firebase';
 import { useLocalRooms } from '../../hooks/useLocalRooms';
 import { toFirebaseDate } from '../../utils/formatDate';
+import { generateInviteCode } from '../../utils/inviteCode';
 import { Caps, Chevron, PrimaryBtn } from '../../components/shared/atoms';
 import CharCounter from '../../components/shared/CharCounter';
 import s from './CreateScreen.module.scss';
 
+
 /**
  * 2본 — 방 개설 화면.
  * 여행 이름·날짜·인원을 입력하면 Firebase에 방을 생성하고,
- * 초대 링크를 보여주는 성공 오버레이를 표시한다.
+ * 초대 코드를 보여주는 성공 오버레이를 표시한다.
  */
 export default function CreateScreen() {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ export default function CreateScreen() {
   const [isComposing, setIsComposing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
   const [copied, setCopied] = useState(false);
 
   // 종료일이 시작일보다 이른 경우 에러 (YYYY-MM-DD 문자열은 사전순 비교로 날짜 비교 가능)
@@ -35,9 +38,6 @@ export default function CreateScreen() {
       : '';
 
   const canSubmit = name.trim().length > 0 && members.length >= 2 && !dateError;
-  const inviteLink = createdId
-    ? `${window.location.origin}/room/${createdId}`
-    : '';
 
   function addMember() {
     // maxLength={10}은 이름 글자수 제한이고, 이 체크는 배열 길이(최대 인원) 제한
@@ -56,6 +56,7 @@ export default function CreateScreen() {
     if (!canSubmit || creating) return;
     setCreating(true);
     try {
+      const code = generateInviteCode();
       // Firebase push로 고유 roomId 생성
       const roomRef = push(ref(db, 'rooms'));
       const roomId = roomRef.key!;
@@ -71,14 +72,16 @@ export default function CreateScreen() {
         status: 'active',
         createdAt: Date.now(),
         ownerToken,
+        inviteCode: code,
       });
       // 방장 토큰을 이 기기에 저장 — 삭제 권한 확인에 사용
       localStorage.setItem(`triply_owner_${roomId}`, ownerToken);
       addRoomId(roomId);
+      setInviteCode(code);
       setCreatedId(roomId);
     } catch (err) {
       console.error('[CreateScreen] 방 생성 실패:', err);
-      alert('방을 만드는 데 실패했어요. 다시 시도해주세요.');
+      alert(err instanceof Error ? err.message : '방을 만드는 데 실패했어요. 다시 시도해주세요.');
     } finally {
       setCreating(false);
     }
@@ -86,7 +89,7 @@ export default function CreateScreen() {
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(inviteLink);
+      await navigator.clipboard.writeText(inviteCode);
       setCopied(true);
       // 2초 후 복사 완료 상태 초기화
       setTimeout(() => setCopied(false), 2000);
@@ -207,7 +210,7 @@ export default function CreateScreen() {
       {/* 하단 CTA */}
       <div className={s.bottom}>
         <PrimaryBtn onClick={handleCreate} disabled={!canSubmit || creating}>
-          <span>{creating ? '생성 중...' : '방 만들고 링크 공유'}</span>
+          <span>{creating ? '생성 중...' : '방 만들고 코드 공유'}</span>
           <Chevron dir="right" size={14} color="#fff" />
         </PrimaryBtn>
       </div>
@@ -219,11 +222,11 @@ export default function CreateScreen() {
             <div className={s.overlayHandle} />
             <p className={s.overlayTitle}>방이 만들어졌어요!</p>
             <p className={s.overlayDesc}>
-              아래 링크를 친구들에게 공유하면 바로 입장할 수 있어요.
+              아래 초대 코드를 친구들에게 공유하면 바로 입장할 수 있어요.
             </p>
 
             <div className={s.linkBox}>
-              <span className={s.linkText}>{inviteLink}</span>
+              <span className={s.inviteCodeText}>{inviteCode}</span>
               <button
                 className={`${s.copyBtn} ${copied ? s.copyDone : ''}`}
                 onClick={handleCopy}

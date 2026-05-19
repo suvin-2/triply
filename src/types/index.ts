@@ -23,6 +23,7 @@ export interface Room {
   status: RoomStatus;
   createdAt: number;
   ownerToken?: string;
+  inviteCode: string;
 }
 
 // TripScreen / SettleScreen용
