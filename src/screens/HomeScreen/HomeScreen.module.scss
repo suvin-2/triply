@@ -220,6 +220,12 @@
   flex-shrink: 0;
 }
 
+.memberCountWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
 .memberCount {
   font-family: $font-mono;
   font-size: 18px;

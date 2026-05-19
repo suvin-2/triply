@@ -276,6 +276,8 @@
 
 .statCell {
   padding: 16px 0;
+  min-width: 0;
+  overflow: hidden;
 
   &:first-child {
     padding-right: 14px;
@@ -302,7 +304,15 @@
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.04em;
-  line-height: 1;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }
 
 .statSub {
@@ -356,7 +366,7 @@
 
 .doneNotice {
   padding: 10px 16px;
-  background: #F0EDE6;
+  background: #f0ede6;
   border-radius: 8px;
   font-size: 12px;
   color: $mute;
@@ -389,7 +399,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 0;
+  padding: 16px 8px 16px 0;
   background: $card;
   min-width: 100%;
   will-change: transform;
@@ -405,10 +415,10 @@
 }
 
 .editAction {
-  width: 70px;
+  width: 56px;
   border: none;
-  background: #2563eb;
-  color: #fff;
+  background: rgba(55, 138, 221, 0.1);
+  color: #378ADD;
   font-size: 20px;
   font-family: inherit;
   cursor: pointer;
@@ -422,10 +432,10 @@
 }
 
 .deleteAction {
-  width: 70px;
+  width: 56px;
   border: none;
-  background: $accent;
-  color: #fff;
+  background: rgba(226, 75, 74, 0.1);
+  color: #E24B4A;
   font-size: 20px;
   font-family: inherit;
   cursor: pointer;
@@ -580,85 +590,6 @@
   font-weight: 500;
 }
 
-// ─── 이름 입력 모달 ──────────────────────────────────────────
-.nameOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(10, 10, 10, 0.5);
-  display: flex;
-  align-items: flex-end;
-  z-index: 20;
-}
-
-.nameSheet {
-  width: 100%;
-  background: $card;
-  border-top-left-radius: $radius-lg;
-  border-top-right-radius: $radius-lg;
-  padding: 14px $screen-px 48px;
-  border-top: 1px solid $ink;
-}
-
-.nameHandle {
-  width: 40px;
-  height: 4px;
-  background: #d6d0c2;
-  border-radius: 2px;
-  margin: 0 auto 20px;
-}
-
-.nameTitle {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-}
-
-.nameDesc {
-  font-size: 13px;
-  color: $mute;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.nameInput {
-  width: 100%;
-  padding: 14px 0;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid $ink;
-  font-size: 18px;
-  font-family: inherit;
-  color: $ink;
-  font-weight: 600;
-  margin-bottom: 20px;
-
-  &::placeholder {
-    color: $mute;
-    font-weight: 400;
-  }
-}
-
-.nameConfirmBtn {
-  width: 100%;
-  padding: 18px;
-  background: $ink;
-  color: #fff;
-  border: none;
-  border-radius: $radius;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-
-  &:disabled {
-    background: #bfbaa8;
-    cursor: not-allowed;
-  }
-}
-
-
 .toast {
   position: fixed;
   bottom: 120px;
@@ -676,6 +607,12 @@
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }

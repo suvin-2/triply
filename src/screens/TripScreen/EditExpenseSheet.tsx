@@ -1,18 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
-import { ref, update } from 'firebase/database';
-import { db } from '../../lib/firebase';
-import { Avatar, Caps, Chevron } from '../../components/shared/atoms';
-import CharCounter from '../../components/shared/CharCounter';
-import { fmt, amountFontSize } from '../../utils/format';
-import { CATEGORIES } from '../../types';
-import type { Expense, ExpenseCategory, RoomWithExpenses } from '../../types';
-import s from './EditExpenseSheet.module.scss';
+import { useState, useEffect, useRef } from "react";
+import { ref, update } from "firebase/database";
+import { db } from "../../lib/firebase";
+import { Avatar, Caps, Chevron } from "../../components/shared/atoms";
+import CharCounter from "../../components/shared/CharCounter";
+import { fmt, amountFontSize } from "../../utils/format";
+import { CATEGORIES } from "../../types";
+import type { Expense, ExpenseCategory, RoomWithExpenses } from "../../types";
+import s from "./EditExpenseSheet.module.scss";
 
 interface Props {
   room: RoomWithExpenses;
   expense: Expense;
   onClose: () => void;
   onSaved: () => void;
+  onError?: (msg: string) => void;
 }
 
 /**
@@ -20,7 +21,13 @@ interface Props {
  * AddExpenseSheet와 동일한 UI를 사용하되 기존 지출 값을 pre-fill하고,
  * 저장 시 Firebase update()를 호출한다. createdAt은 수정하지 않는다.
  */
-export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Props) {
+export default function EditExpenseSheet({
+  room,
+  expense,
+  onClose,
+  onSaved,
+  onError,
+}: Props) {
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState(expense.title);
   const [amount, setAmount] = useState(String(expense.amount));
@@ -37,14 +44,18 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
 
   const MAX_AMOUNT = 10_000_000;
 
-  const numAmount = parseInt(amount || '0', 10) || 0;
+  const numAmount = parseInt(amount || "0", 10) || 0;
   const perPerson = splitWith.length > 0 ? numAmount / splitWith.length : 0;
-  const canSave = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
+  const canSave =
+    title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
   const allSelected = splitWith.length === room.members.length;
 
   function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/\D/g, '');
-    if (raw === '') { setAmount(''); return; }
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw === "") {
+      setAmount("");
+      return;
+    }
     const num = parseInt(raw, 10);
     if (num > MAX_AMOUNT) return;
     setAmount(String(num));
@@ -52,7 +63,9 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
 
   function toggleParticipant(member: string) {
     setSplitWith((prev) =>
-      prev.includes(member) ? prev.filter((x) => x !== member) : [...prev, member],
+      prev.includes(member)
+        ? prev.filter((x) => x !== member)
+        : [...prev, member],
     );
   }
 
@@ -60,34 +73,38 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
     setSplitWith(allSelected ? [] : [...room.members]);
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!canSave || saving) return;
     setSaving(true);
-    try {
-      // createdAt은 수정하지 않음 — 원본 생성 시각 보존
-      await update(ref(db, `rooms/${room.id}/expenses/${expense.id}`), {
+    // createdAt은 수정하지 않음 — 원본 생성 시각 보존
+    const updateRef = update(
+      ref(db, `rooms/${room.id}/expenses/${expense.id}`),
+      {
         title: title.trim(),
         amount: numAmount,
         paidBy,
         splitWith,
         category,
+      },
+    );
+    onSaved();
+    updateRef
+      .catch((err) => {
+        console.error("[EditExpenseSheet] 지출 수정 실패:", err);
+        onError?.("지출 수정에 실패했어요. 다시 시도해주세요.");
+      })
+      .finally(() => {
+        setSaving(false);
       });
-      onSaved();
-    } catch (err) {
-      console.error('[EditExpenseSheet] 지출 수정 실패:', err);
-      alert('지출 수정에 실패했어요. 다시 시도해주세요.');
-    } finally {
-      setSaving(false);
-    }
   }
 
   return (
     <div
-      className={`${s.overlay} ${visible ? s.visible : ''}`}
+      className={`${s.overlay} ${visible ? s.visible : ""}`}
       onClick={onClose}
     >
       <div
-        className={`${s.sheet} ${visible ? s.visible : ''}`}
+        className={`${s.sheet} ${visible ? s.visible : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 드래그 핸들 */}
@@ -103,7 +120,11 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
           </div>
           <button className={s.closeBtn} onClick={onClose} aria-label="닫기">
             <svg width="18" height="18" viewBox="0 0 18 18">
-              <path d="M2 2L16 16M16 2L2 16" stroke="#0A0A0A" strokeWidth="1.6" />
+              <path
+                d="M2 2L16 16M16 2L2 16"
+                stroke="#0A0A0A"
+                strokeWidth="1.6"
+              />
             </svg>
           </button>
         </div>
@@ -111,7 +132,10 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
         {/* 스크롤 영역 */}
         <div className={s.scrollArea}>
           {/* 금액 디스플레이 (탭하면 네이티브 키패드 올라옴) */}
-          <div className={s.amountBlock} onClick={() => inputRef.current?.focus()}>
+          <div
+            className={s.amountBlock}
+            onClick={() => inputRef.current?.focus()}
+          >
             <input
               ref={inputRef}
               className={s.amountInput}
@@ -124,14 +148,17 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
             />
             <div
               className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}
-              style={{ fontSize: numAmount > 0 ? amountFontSize(numAmount, 56) : undefined }}
+              style={{
+                fontSize:
+                  numAmount > 0 ? amountFontSize(numAmount, 56) : undefined,
+              }}
             >
-              {numAmount === 0 ? '0' : fmt(numAmount)}
+              {numAmount === 0 ? "0" : fmt(numAmount)}
               <span className={s.amountUnit}>원</span>
             </div>
             {numAmount > 0 && splitWith.length > 0 && (
               <div className={s.perPersonLabel}>
-                1인당{' '}
+                1인당{" "}
                 <span className={s.perPersonAmount}>{fmt(perPerson)}</span>원
               </div>
             )}
@@ -177,7 +204,15 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
                   onClick={() => setPaidBy(member)}
                 >
                   <Avatar name={member} size={22} dark={paidBy !== member} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member}</span>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {member}
+                  </span>
                 </button>
               ))}
             </div>
@@ -190,7 +225,7 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
                 참여 인원 ({splitWith.length}/{room.members.length})
               </div>
               <button className={s.toggleAllBtn} onClick={toggleAll}>
-                {allSelected ? '전체 해제' : '전체 선택'}
+                {allSelected ? "전체 해제" : "전체 선택"}
               </button>
             </div>
             <div className={s.participantGrid}>
@@ -206,7 +241,9 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
                       <Avatar name={member} size={22} dark={!on} />
                       <span className={s.participantName}>{member}</span>
                     </div>
-                    <div className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}>
+                    <div
+                      className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}
+                    >
                       {on && (
                         <svg width="12" height="10" viewBox="0 0 12 10">
                           <path
@@ -234,7 +271,7 @@ export default function EditExpenseSheet({ room, expense, onClose, onSaved }: Pr
             onClick={handleSave}
             disabled={!canSave || saving}
           >
-            <span>{saving ? '저장 중...' : '지출 입력'}</span>
+            <span>{saving ? "저장하고 있어요." : "지출 입력"}</span>
             <Chevron dir="right" size={14} color="#fff" />
           </button>
         </div>

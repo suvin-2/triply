@@ -13,11 +13,19 @@ const MAX_EXPENSES = 10;
  */
 function barcodePattern(seed: string): Array<{ w: number; fill: boolean }> {
   let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+  }
+
   const bars: Array<{ w: number; fill: boolean }> = [];
-  for (let i = 0; i < 56; i++) {
-    h = (h * 1103515245 + 12345) >>> 0;
-    bars.push({ w: 1 + (h % 4), fill: ((h >>> 4) & 1) === 1 });
+  // 실제 바코드처럼 보이도록 검정선과 공백(투명)을 번갈아 생성합니다.
+  for (let i = 0; i < 46; i++) {
+    const x = Math.sin(h++) * 10000;
+    const r = x - Math.floor(x);
+    bars.push({ 
+      w: 1 + Math.floor(r * 4), // 선과 공백의 너비를 1~4px로 랜덤화
+      fill: i % 2 === 0         // 짝수 인덱스는 검정, 홀수는 투명
+    });
   }
   return bars;
 }

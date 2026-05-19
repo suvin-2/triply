@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
-import { ref, push } from 'firebase/database';
-import { db } from '../../lib/firebase';
-import { Avatar, Caps, Chevron } from '../../components/shared/atoms';
-import CharCounter from '../../components/shared/CharCounter';
-import { fmt, amountFontSize } from '../../utils/format';
-import { CATEGORIES } from '../../types';
-import type { RoomWithExpenses, ExpenseCategory } from '../../types';
-import s from './AddExpenseSheet.module.scss';
+import { useState, useEffect, useRef } from "react";
+import { ref, push } from "firebase/database";
+import { db } from "../../lib/firebase";
+import { Avatar, Caps, Chevron } from "../../components/shared/atoms";
+import CharCounter from "../../components/shared/CharCounter";
+import { fmt, amountFontSize } from "../../utils/format";
+import { CATEGORIES } from "../../types";
+import type { RoomWithExpenses, ExpenseCategory } from "../../types";
+import s from "./AddExpenseSheet.module.scss";
 
 interface Props {
   room: RoomWithExpenses;
   onClose: () => void;
+  onError?: (msg: string) => void;
 }
 
 /**
@@ -18,13 +19,13 @@ interface Props {
  * TripScreen 위에 88% 높이로 슬라이드업 렌더링된다.
  * 네이티브 숫자 키패드로 금액을 입력하고, Firebase에 지출을 저장한다.
  */
-export default function AddExpenseSheet({ room, onClose }: Props) {
+export default function AddExpenseSheet({ room, onClose, onError }: Props) {
   const [visible, setVisible] = useState(false);
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState(room.members[0] ?? '');
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [paidBy, setPaidBy] = useState(room.members[0] ?? "");
   const [splitWith, setSplitWith] = useState<string[]>([...room.members]);
-  const [category, setCategory] = useState<ExpenseCategory>('식사');
+  const [category, setCategory] = useState<ExpenseCategory>("식사");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,14 +37,18 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
 
   const MAX_AMOUNT = 10_000_000;
 
-  const numAmount = parseInt(amount || '0', 10) || 0;
+  const numAmount = parseInt(amount || "0", 10) || 0;
   const perPerson = splitWith.length > 0 ? numAmount / splitWith.length : 0;
-  const canSubmit = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
+  const canSubmit =
+    title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
   const allSelected = splitWith.length === room.members.length;
 
   function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/\D/g, '');
-    if (raw === '') { setAmount(''); return; }
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw === "") {
+      setAmount("");
+      return;
+    }
     const num = parseInt(raw, 10);
     if (num > MAX_AMOUNT) return;
     setAmount(String(num));
@@ -51,7 +56,9 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
 
   function toggleParticipant(member: string) {
     setSplitWith((prev) =>
-      prev.includes(member) ? prev.filter((x) => x !== member) : [...prev, member],
+      prev.includes(member)
+        ? prev.filter((x) => x !== member)
+        : [...prev, member],
     );
   }
 
@@ -59,34 +66,35 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
     setSplitWith(allSelected ? [] : [...room.members]);
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!canSubmit || submitting) return;
     setSubmitting(true);
-    try {
-      await push(ref(db, `rooms/${room.id}/expenses`), {
-        title: title.trim(),
-        amount: numAmount,
-        paidBy,
-        splitWith,
-        category,
-        createdAt: Date.now(),
+    const pushRef = push(ref(db, `rooms/${room.id}/expenses`), {
+      title: title.trim(),
+      amount: numAmount,
+      paidBy,
+      splitWith,
+      category,
+      createdAt: Date.now(),
+    });
+    onClose();
+    pushRef
+      .catch((err) => {
+        console.error("[AddExpenseSheet] 지출 추가 실패:", err);
+        onError?.("지출 추가에 실패했어요. 다시 시도해주세요.");
+      })
+      .finally(() => {
+        setSubmitting(false);
       });
-      onClose();
-    } catch (err) {
-      console.error('[AddExpenseSheet] 지출 추가 실패:', err);
-      alert('지출 추가에 실패했어요. 다시 시도해주세요.');
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   return (
     <div
-      className={`${s.overlay} ${visible ? s.visible : ''}`}
+      className={`${s.overlay} ${visible ? s.visible : ""}`}
       onClick={onClose}
     >
       <div
-        className={`${s.sheet} ${visible ? s.visible : ''}`}
+        className={`${s.sheet} ${visible ? s.visible : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 드래그 핸들 */}
@@ -102,7 +110,11 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
           </div>
           <button className={s.closeBtn} onClick={onClose} aria-label="닫기">
             <svg width="18" height="18" viewBox="0 0 18 18">
-              <path d="M2 2L16 16M16 2L2 16" stroke="#0A0A0A" strokeWidth="1.6" />
+              <path
+                d="M2 2L16 16M16 2L2 16"
+                stroke="#0A0A0A"
+                strokeWidth="1.6"
+              />
             </svg>
           </button>
         </div>
@@ -110,7 +122,10 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
         {/* 스크롤 영역 */}
         <div className={s.scrollArea}>
           {/* 금액 — 히어로 디스플레이 (탭하면 네이티브 키패드 올라옴) */}
-          <div className={s.amountBlock} onClick={() => inputRef.current?.focus()}>
+          <div
+            className={s.amountBlock}
+            onClick={() => inputRef.current?.focus()}
+          >
             <input
               ref={inputRef}
               className={s.amountInput}
@@ -123,14 +138,17 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             />
             <div
               className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}
-              style={{ fontSize: numAmount > 0 ? amountFontSize(numAmount, 56) : undefined }}
+              style={{
+                fontSize:
+                  numAmount > 0 ? amountFontSize(numAmount, 56) : undefined,
+              }}
             >
-              {numAmount === 0 ? '0' : fmt(numAmount)}
+              {numAmount === 0 ? "0" : fmt(numAmount)}
               <span className={s.amountUnit}>원</span>
             </div>
             {numAmount > 0 && splitWith.length > 0 && (
               <div className={s.perPersonLabel}>
-                1인당{' '}
+                1인당{" "}
                 <span className={s.perPersonAmount}>{fmt(perPerson)}</span>원
               </div>
             )}
@@ -176,7 +194,15 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
                   onClick={() => setPaidBy(member)}
                 >
                   <Avatar name={member} size={22} dark={paidBy !== member} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member}</span>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {member}
+                  </span>
                 </button>
               ))}
             </div>
@@ -189,7 +215,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
                 참여 인원 ({splitWith.length}/{room.members.length})
               </div>
               <button className={s.toggleAllBtn} onClick={toggleAll}>
-                {allSelected ? '전체 해제' : '전체 선택'}
+                {allSelected ? "전체 해제" : "전체 선택"}
               </button>
             </div>
             <div className={s.participantGrid}>
@@ -205,7 +231,9 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
                       <Avatar name={member} size={22} dark={!on} />
                       <span className={s.participantName}>{member}</span>
                     </div>
-                    <div className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}>
+                    <div
+                      className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}
+                    >
                       {on && (
                         <svg width="12" height="10" viewBox="0 0 12 10">
                           <path
@@ -233,7 +261,7 @@ export default function AddExpenseSheet({ room, onClose }: Props) {
             onClick={handleSubmit}
             disabled={!canSubmit || submitting}
           >
-            <span>{submitting ? '추가 중...' : '지출 입력'}</span>
+            <span>{submitting ? "추가하고 있어요." : "지출 입력"}</span>
             <Chevron dir="right" size={14} color="#fff" />
           </button>
         </div>

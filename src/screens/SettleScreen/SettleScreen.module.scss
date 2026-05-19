@@ -20,6 +20,22 @@
   gap: 8px;
 }
 
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $line;
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .loadingText {
   font-size: 14px;
   color: $mute;
@@ -52,7 +68,7 @@
 
 .menuWrap {
   position: relative;
-  z-index: 200;
+  z-index: 1100;
 }
 
 .menuBtn {
@@ -72,7 +88,7 @@
   border: 1px solid $line;
   border-radius: $radius;
   min-width: 150px;
-  z-index: 1000;
+  z-index: 10000;
   overflow: hidden;
 }
 
@@ -386,9 +402,28 @@
   border-top: 1px solid $line;
 }
 
+.bottomRow {
+  display: flex;
+  gap: 8px;
+}
+
+.homeBtn {
+  flex: 1;
+  padding: 16px 0;
+  border-radius: $radius;
+  border: 1px solid $line;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: $mute;
+  transition: opacity 0.12s;
+}
+
 .doneBtn {
-  width: 100%;
-  padding: 16px;
+  flex: 1;
+  padding: 16px 0;
   border-radius: $radius;
   border: 1px solid $line;
   font-size: 13px;

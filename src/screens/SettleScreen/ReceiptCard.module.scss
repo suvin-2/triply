@@ -10,6 +10,8 @@ $receipt-line: #E5E0D6;
   font-family: $font-mono;
   color: $receipt-ink;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .body {
@@ -65,7 +67,7 @@ $receipt-line: #E5E0D6;
   letter-spacing: -0.02em;
   line-height: 1.15;
   max-width: 100%;
-  word-break: keep-all;
+  word-break: break-all;
   overflow-wrap: break-word;
 }
 
@@ -104,6 +106,8 @@ $receipt-line: #E5E0D6;
   padding-bottom: 8px;
   border-bottom: 1px dotted $receipt-line;
   letter-spacing: 0.08em;
+  width: 100%;
+  min-width: 0;
 }
 
 .itemRow {
@@ -113,6 +117,8 @@ $receipt-line: #E5E0D6;
   font-size: 11px;
   padding-top: 7px;
   align-items: baseline;
+  width: 100%;
+  min-width: 0;
 }
 
 .itemQty {
@@ -125,9 +131,11 @@ $receipt-line: #E5E0D6;
 
 .itemTitle {
   font-weight: 700;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
 }
 
 .itemSub {
@@ -154,6 +162,8 @@ $receipt-line: #E5E0D6;
   grid-template-columns: 24px 1fr auto;
   gap: 8px;
   padding-top: 7px;
+  width: 100%;
+  min-width: 0;
 }
 
 .overflowText {
@@ -296,7 +306,6 @@ $receipt-line: #E5E0D6;
   display: flex;
   align-items: flex-end;
   height: 44px;
-  gap: 1px;
   justify-content: center;
 }
 
