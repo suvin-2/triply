@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ref, remove } from 'firebase/database';
+import { ref, remove, update } from 'firebase/database';
 import { db } from '../../lib/firebase';
 import { useRoom, addMember } from '../../hooks/useRoom';
-import { useLongPress } from '../../hooks/useLongPress';
 import { useLocalRooms } from '../../hooks/useLocalRooms';
 import { useHiddenRooms } from '../../hooks/useHiddenRooms';
 import { useRoomUser } from '../../hooks/useRoomUser';
 import { isOwner } from '../../utils/isOwner';
 import { Avatar, AvatarStack, Chevron } from '../../components/shared/atoms';
 import CharCounter from '../../components/shared/CharCounter';
-import { fmt, fmtTimestamp } from '../../utils/format';
+import { fmt, fmtTimestamp, amountFontSize } from '../../utils/format';
 import { formatDateLabel } from '../../utils/formatDate';
 import { CATEGORIES } from '../../types';
 import type { Expense, ExpenseCategory } from '../../types';
@@ -46,11 +45,15 @@ export default function TripScreen() {
   const [addMemberError, setAddMemberError] = useState('');
   const [addMemberLoading, setAddMemberLoading] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
-  const [expenseActionOpen, setExpenseActionOpen] = useState(false);
+  const [swipedId, setSwipedId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [expenseDeleteConfirmOpen, setExpenseDeleteConfirmOpen] = useState(false);
   const [expenseDeleting, setExpenseDeleting] = useState(false);
   const [toast, setToast] = useState('');
+  const [renameTitleOpen, setRenameTitleOpen] = useState(false);
+  const [renameTitleInput, setRenameTitleInput] = useState('');
+  const [renameTitleLoading, setRenameTitleLoading] = useState(false);
+  const [renameTitleError, setRenameTitleError] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { hideRoom } = useHiddenRooms();
@@ -152,6 +155,23 @@ export default function TripScreen() {
     }
   }
 
+  async function handleRenameTitle() {
+    const trimmed = renameTitleInput.trim();
+    if (!trimmed) return;
+    setRenameTitleLoading(true);
+    setRenameTitleError('');
+    try {
+      await update(ref(db, `rooms/${roomId}`), { name: trimmed });
+      setRenameTitleOpen(false);
+      setRenameTitleInput('');
+    } catch (err) {
+      console.error('[TripScreen] 방 제목 변경 실패:', err);
+      setRenameTitleError('제목 변경에 실패했어요. 다시 시도해주세요.');
+    } finally {
+      setRenameTitleLoading(false);
+    }
+  }
+
   async function handleExpenseDelete() {
     if (!selectedExpense || expenseDeleting) return;
     setExpenseDeleting(true);
@@ -215,6 +235,14 @@ export default function TripScreen() {
               {room.status === 'active' && (
                 <button
                   className={s.dropdownItem}
+                  onClick={() => { setMenuOpen(false); setRenameTitleInput(room.name); setRenameTitleOpen(true); }}
+                >
+                  제목 변경
+                </button>
+              )}
+              {room.status === 'active' && (
+                <button
+                  className={s.dropdownItem}
                   onClick={() => { setMenuOpen(false); setAddMemberOpen(true); }}
                 >
                   인원 추가
@@ -256,12 +284,12 @@ export default function TripScreen() {
         <div className={s.stats}>
           <div className={s.statCell}>
             <div className={s.statLabel}>총 지출</div>
-            <div className={`mono ${s.statNumber}`}>{fmt(total)}</div>
+            <div className={`mono ${s.statNumber}`} style={{ fontSize: amountFontSize(total, 32) }}>{fmt(total)}</div>
             <div className={s.statSub}>KRW · {room.expenses.length}건</div>
           </div>
           <div className={s.statCell}>
             <div className={s.statLabel}>1인 평균</div>
-            <div className={`mono ${s.statNumber}`}>{fmt(perPerson)}</div>
+            <div className={`mono ${s.statNumber}`} style={{ fontSize: amountFontSize(perPerson, 32) }}>{fmt(perPerson)}</div>
             <div className={s.statSub}>÷ {room.members.length}명</div>
           </div>
         </div>
@@ -281,7 +309,7 @@ export default function TripScreen() {
       </div>
 
       {/* 지출 목록 */}
-      <div className={s.expenseList}>
+      <div className={s.expenseList} onScroll={() => setSwipedId(null)}>
         {room.status === 'done' && (
           <div className={s.doneNotice}>정산이 완료된 여행이에요</div>
         )}
@@ -296,7 +324,10 @@ export default function TripScreen() {
             key={expense.id}
             expense={expense}
             canEdit={room.status === 'active'}
-            onLongPress={(e) => { setSelectedExpense(e); setExpenseActionOpen(true); }}
+            isSwiped={swipedId === expense.id}
+            onSwipe={(id) => setSwipedId(id)}
+            onEdit={(e) => { setSwipedId(null); setSelectedExpense(e); setEditOpen(true); }}
+            onDelete={(e) => { setSwipedId(null); setSelectedExpense(e); setExpenseDeleteConfirmOpen(true); }}
           />
         ))}
       </div>
@@ -391,39 +422,6 @@ export default function TripScreen() {
         </div>
       )}
 
-      {/* 지출 액션 모달 (수정 / 삭제 선택) */}
-      {expenseActionOpen && selectedExpense && (
-        <div className={s.dialogOverlay} onClick={() => setExpenseActionOpen(false)}>
-          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
-            <p className={s.dialogTitle}>{selectedExpense.title}</p>
-            <div className={s.dialogBtns} style={{ flexDirection: 'column' }}>
-              {room.status === 'active' && (
-                <button
-                  className={s.dialogConfirm}
-                  onClick={() => { setExpenseActionOpen(false); setEditOpen(true); }}
-                >
-                  수정하기
-                </button>
-              )}
-              <button
-                className={s.dialogDelete}
-                onClick={() => { setExpenseActionOpen(false); setExpenseDeleteConfirmOpen(true); }}
-                style={{ marginTop: 8 }}
-              >
-                삭제하기
-              </button>
-              <button
-                className={s.dialogCancel}
-                onClick={() => setExpenseActionOpen(false)}
-                style={{ marginTop: 8 }}
-              >
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 지출 삭제 확인 다이얼로그 */}
       {expenseDeleteConfirmOpen && selectedExpense && (
         <div className={s.dialogOverlay} onClick={() => setExpenseDeleteConfirmOpen(false)}>
@@ -492,54 +490,164 @@ export default function TripScreen() {
           </div>
         </div>
       )}
+
+      {/* 제목 변경 모달 */}
+      {renameTitleOpen && (
+        <div className={s.dialogOverlay} onClick={() => { setRenameTitleOpen(false); setRenameTitleInput(''); setRenameTitleError(''); }}>
+          <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={s.dialogTitle}>제목 변경</p>
+            <div className={s.addMemberInputWrap}>
+              <input
+                className={s.addMemberInput}
+                value={renameTitleInput}
+                onChange={(e) => { setRenameTitleInput(e.target.value); setRenameTitleError(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleRenameTitle(); }}
+                placeholder="여행 이름"
+                maxLength={30}
+                autoFocus
+              />
+              <CharCounter current={renameTitleInput.length} max={30} />
+              {renameTitleError && <p className={s.addMemberError}>{renameTitleError}</p>}
+            </div>
+            <div className={s.dialogBtns}>
+              <button className={s.dialogCancel} onClick={() => { setRenameTitleOpen(false); setRenameTitleInput(''); setRenameTitleError(''); }}>
+                취소
+              </button>
+              <button
+                className={s.dialogConfirm}
+                onClick={handleRenameTitle}
+                disabled={!renameTitleInput.trim() || renameTitleLoading}
+              >
+                {renameTitleLoading ? '변경 중...' : '확인'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// ExpenseItem — 개별 지출 카드. useLongPress 훅을 사용하므로 TripScreen
-// 함수 외부에 별도 컴포넌트로 분리한다 (훅은 map 안에서 호출 불가).
+// ExpenseItem — 개별 지출 카드. 좌측 스와이프로 수정/삭제 버튼 노출.
+// 훅은 map 안에서 호출 불가이므로 TripScreen 함수 외부에 분리한다.
 // ─────────────────────────────────────────────────────────────────────
 interface ExpenseItemProps {
   expense: Expense;
   canEdit: boolean;
-  onLongPress: (expense: Expense) => void;
+  isSwiped: boolean;
+  onSwipe: (id: string | null) => void;
+  onEdit: (expense: Expense) => void;
+  onDelete: (expense: Expense) => void;
 }
 
-function ExpenseItem({ expense, canEdit, onLongPress }: ExpenseItemProps) {
-  const longPress = useLongPress(() => {
-    if (canEdit) onLongPress(expense);
-  });
+function ExpenseItem({ expense, canEdit, isSwiped, onSwipe, onEdit, onDelete }: ExpenseItemProps) {
+  const [offset, setOffset] = useState(0);
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const dragging = useRef(false);
+
+  const ACTION_W = canEdit ? 140 : 70; // 수정(70) + 삭제(70) 또는 삭제(70)만
+  const THRESHOLD = 60;
+
+  // 외부에서 스와이프 닫기 요청 시 offset 초기화
+  useEffect(() => {
+    if (!isSwiped) setOffset(0);
+  }, [isSwiped]);
+
+  function startGesture(x: number, y: number) {
+    startX.current = x;
+    startY.current = y;
+    dragging.current = true;
+  }
+
+  function moveGesture(x: number, y: number) {
+    if (!dragging.current) return;
+    const dx = startX.current - x;
+    const dy = Math.abs(startY.current - y);
+    // 세로 스크롤이면 스와이프 취소하고 기본 스크롤 허용
+    if (dy > Math.abs(dx)) {
+      setOffset(0);
+      dragging.current = false;
+      return;
+    }
+    if (dx > 0) setOffset(Math.min(dx, ACTION_W));
+    else setOffset(0);
+  }
+
+  function endGesture() {
+    if (!dragging.current) return;
+    dragging.current = false;
+    if (offset >= THRESHOLD) {
+      setOffset(ACTION_W);
+      onSwipe(expense.id);
+    } else {
+      setOffset(0);
+      onSwipe(null);
+    }
+  }
+
+  const currentOffset = isSwiped && !dragging.current ? ACTION_W : offset;
 
   return (
-    <div className={s.expenseItem} {...longPress}>
-      {/* 카테고리 + 날짜 */}
-      <div className={s.expenseMeta}>
-        <div className={s.expenseCategory}>{expense.category}</div>
-        <div className={s.expenseDate}>
-          {fmtTimestamp(expense.createdAt).split(' ')[0]}
-        </div>
-      </div>
-
-      {/* 항목명 + 결제 정보 */}
-      <div className={s.expenseBody}>
-        <div className={s.expenseTitle}>{expense.title}</div>
-        <div className={s.expensePayer}>
-          <Avatar name={expense.paidBy} size={16} dark />
-          <span className={s.payerName}>{expense.paidBy} 결제</span>
-          <span className={s.payerDot} />
-          <span className={s.splitCount}>{expense.splitWith.length}명 분담</span>
-        </div>
-      </div>
-
-      {/* 금액 */}
-      <div className={s.expenseAmount}>
-        <div className={`mono ${s.amountTotal}`}>{fmt(expense.amount)}</div>
-        {expense.splitWith.length > 0 && (
-          <div className={s.amountPer}>
-            / {fmt(expense.amount / expense.splitWith.length)}
+    <div
+      className={s.expenseItem}
+      onTouchStart={(e) => startGesture(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => moveGesture(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={endGesture}
+      onMouseDown={(e) => startGesture(e.clientX, e.clientY)}
+      onMouseMove={(e) => moveGesture(e.clientX, e.clientY)}
+      onMouseUp={endGesture}
+      onMouseLeave={endGesture}
+    >
+      {/* 스와이프 시 왼쪽으로 밀리는 카드 본체 */}
+      <div
+        className={s.swipeInner}
+        style={{
+          transform: `translateX(-${currentOffset}px)`,
+          transition: dragging.current ? 'none' : 'transform 200ms ease',
+        }}
+      >
+        {/* 카테고리 + 날짜 */}
+        <div className={s.expenseMeta}>
+          <div className={s.expenseCategory}>{expense.category}</div>
+          <div className={s.expenseDate}>
+            {fmtTimestamp(expense.createdAt).split(' ')[0]}
           </div>
+        </div>
+
+        {/* 항목명 + 결제 정보 */}
+        <div className={s.expenseBody}>
+          <div className={s.expenseTitle}>{expense.title}</div>
+          <div className={s.expensePayer}>
+            <Avatar name={expense.paidBy} size={16} dark />
+            <span className={s.payerName}>{expense.paidBy} 결제</span>
+            <span className={s.payerDot} />
+            <span className={s.splitCount}>{expense.splitWith.length}명 분담</span>
+          </div>
+        </div>
+
+        {/* 금액 */}
+        <div className={s.expenseAmount}>
+          <div className={`mono ${s.amountTotal}`}>{fmt(expense.amount)}</div>
+          {expense.splitWith.length > 0 && (
+            <div className={s.amountPer}>
+              / {fmt(expense.amount / expense.splitWith.length)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 스와이프 액션 버튼 — 카드 우측에 절대 위치 */}
+      <div className={s.swipeActions} style={{ width: ACTION_W }}>
+        {canEdit && (
+          <button className={s.editAction} aria-label="수정" onClick={() => onEdit(expense)}>
+            <i className="ti ti-pencil" aria-hidden="true" />
+          </button>
         )}
+        <button className={s.deleteAction} aria-label="삭제" onClick={() => onDelete(expense)}>
+          <i className="ti ti-trash" aria-hidden="true" />
+        </button>
       </div>
     </div>
   );

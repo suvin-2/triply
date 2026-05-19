@@ -4,7 +4,6 @@
   position: absolute;
   inset: 0;
   padding-top: 20px;
-  padding-bottom: 36px;
   background: $card;
   color: $ink;
   display: flex;
@@ -76,6 +75,7 @@
 
 .menuWrap {
   position: relative;
+  z-index: 200;
 }
 
 .menuBtn {
@@ -90,7 +90,7 @@
   border: 1px solid $line;
   border-radius: $radius;
   min-width: 150px;
-  z-index: 100;
+  z-index: 1000;
   overflow: hidden;
 }
 
@@ -299,7 +299,7 @@
 
 .statNumber {
   font-family: $font-mono;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -351,8 +351,7 @@
 .expenseList {
   flex: 1;
   overflow-y: auto;
-  // FAB 높이(60px) + gap(8px) + 여백(36px) 만큼 하단 패딩
-  padding: 4px $screen-px 120px;
+  padding: 4px $screen-px 8px;
 }
 
 .doneNotice {
@@ -373,14 +372,69 @@
 }
 
 .expenseItem {
-  padding: 16px 0;
+  position: relative;
+  overflow: hidden;
   border-bottom: 1px solid $line;
-  display: flex;
-  align-items: center;
-  gap: 12px;
 
   &:last-child {
     border-bottom: none;
+  }
+}
+
+// 카드 본체 — 스와이프 시 translateX로 밀림
+// position: relative + z-index: 1로 swipeActions(절대위치) 위에 카드가 렌더되도록 함
+.swipeInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  background: $card;
+  min-width: 100%;
+  will-change: transform;
+}
+
+// 스와이프 시 우측에서 나타나는 액션 버튼 영역
+.swipeActions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+}
+
+.editAction {
+  width: 70px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-size: 20px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.deleteAction {
+  width: 70px;
+  border: none;
+  background: $accent;
+  color: #fff;
+  font-size: 20px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.85;
   }
 }
 
@@ -470,13 +524,12 @@
 
 // ─── FAB + 정산 버튼 바 ──────────────────────────────────────
 .fabBar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 36px;
+  flex-shrink: 0;
   display: flex;
   gap: 8px;
-  padding: 0 $screen-px;
+  padding: 12px $screen-px 36px;
+  background: $card;
+  border-top: 1px solid $line;
 }
 
 .fab {
