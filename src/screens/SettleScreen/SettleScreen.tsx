@@ -11,6 +11,7 @@ import { fmt } from "../../utils/format";
 import { Chevron } from "../../components/shared/atoms";
 import ReceiptCard from "./ReceiptCard";
 import s from "./SettleScreen.module.scss";
+import { LoadingBar } from "../../components/shared/LoadingBar";
 
 /**
  * 5본 — 정산 결과 화면.
@@ -54,7 +55,7 @@ export default function SettleScreen() {
     return (
       <div className={s.screen}>
         <div className={s.center}>
-          <p className={s.loadingText}>불러오는 중...</p>
+          <LoadingBar label="정산 결과를 준비하고 있어요." />
         </div>
       </div>
     );
@@ -354,14 +355,14 @@ export default function SettleScreen() {
                 onClick={handleSave}
                 disabled={capturing}
               >
-                {capturing ? "처리 중..." : "이미지 저장"}
+                {capturing ? "처리하고 있어요." : "이미지 저장"}
               </button>
               <button
                 className={s.shareBtn}
                 onClick={handleShare}
                 disabled={capturing}
               >
-                {capturing ? "처리 중..." : "공유하기"}
+                {capturing ? "처리하고 있어요." : "공유하기"}
               </button>
             </div>
           </div>
@@ -370,15 +371,20 @@ export default function SettleScreen() {
 
       {/* 하단 정산 완료 버튼 */}
       <div className={s.bottomBar}>
-        <button
-          className={s.doneBtn}
-          onClick={() => setConfirmOpen(true)}
-          disabled={settling || room.status === "done"}
-        >
-          {room.status === "done"
-            ? "이미 정산 완료된 여행이에요"
-            : "정산 완료로 표시하기"}
-        </button>
+        <div className={s.bottomRow}>
+          <button className={s.homeBtn} onClick={() => navigate("/")}>
+            홈으로
+          </button>
+          <button
+            className={s.doneBtn}
+            onClick={() => setConfirmOpen(true)}
+            disabled={settling || room.status === "done"}
+          >
+            {room.status === "done"
+              ? "이미 정산 완료된 여행이에요"
+              : "정산 완료로 표시하기"}
+          </button>
+        </div>
         {room.status === "done" && (
           <button
             className={s.revertBtn}
@@ -416,7 +422,7 @@ export default function SettleScreen() {
                 }}
                 disabled={deleting}
               >
-                {deleting ? "삭제 중..." : "삭제하기"}
+                {deleting ? "삭제하고 있어요." : "삭제하기"}
               </button>
             </div>
           </div>
@@ -456,7 +462,10 @@ export default function SettleScreen() {
 
       {/* 정산 완료 취소 확인 다이얼로그 */}
       {revertConfirmOpen && (
-        <div className={s.dialogOverlay} onClick={() => setRevertConfirmOpen(false)}>
+        <div
+          className={s.dialogOverlay}
+          onClick={() => setRevertConfirmOpen(false)}
+        >
           <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
             <p className={s.dialogTitle}>정산 완료를 취소할까요?</p>
             <p className={s.dialogDesc}>
@@ -479,7 +488,7 @@ export default function SettleScreen() {
                 }}
                 disabled={reverting}
               >
-                {reverting ? "취소 중..." : "완료 취소하기"}
+                {reverting ? "취소하고 있어요." : "완료 취소하기"}
               </button>
             </div>
           </div>

@@ -8,7 +8,7 @@ import { useRef } from 'react';
  * @param ms       - 트리거 임계값 (기본값: 600ms)
  */
 export function useLongPress(callback: () => void, ms = 600) {
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const start = () => {
     timerRef.current = setTimeout(callback, ms);

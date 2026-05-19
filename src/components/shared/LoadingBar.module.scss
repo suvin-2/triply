@@ -1,0 +1,40 @@
+@use "../../styles/variables" as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loadingBar {
+  width: 120px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: $line;
+}
+
+.loadingBarFill {
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: $accent;
+  animation: loading-slide 0.9s ease-in-out infinite;
+}
+
+.label {
+  margin: 0;
+  font-size: 14px;
+  color: $mute;
+}
+
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(260%);
+  }
+}
