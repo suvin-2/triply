@@ -1,0 +1,9 @@
+@use "../../styles/variables" as *;
+
+.fallback {
+  padding: 40px $screen-px;
+  text-align: center;
+  color: $mute;
+  font-size: 14px;
+  line-height: 1.6;
+}
