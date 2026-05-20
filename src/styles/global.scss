@@ -1,19 +1,18 @@
-@use 'variables' as *;
-@use 'reset';
+@use "variables" as *;
+@use "reset";
 
 // ─── Fonts (self-hosted) ──────────────────────────────────────
 // CDN 없이 같은 오리진에서 제공 — 외부 DNS/TCP 지연 없음
-// dynamic-subset: 페이지에 실제 사용된 글자만 동적 로드해 용량 최소화
-@import 'pretendard/dist/web/static/pretendard-subset.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
-@import '@fontsource/jetbrains-mono/700.css';
-
+// variable dynamic-subset: unicode-range로 분할된 92개 청크, 실제 화면 문자 범위만 다운로드
+// weight 45-920을 단일 variable font 파일로 커버 (정적 weight별 파일 불필요)
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
+// latin 전용: JetBrains Mono는 숫자·기호(ASCII)에만 사용하므로 latin 범위만 로드
+@import "@fontsource/jetbrains-mono/latin-400.css";
 
 // ─── Global ───────────────────────────────────────────────────
 body {
   font-family: $font-sans;
-  background: $card;
+  background: $bg;
   color: $ink;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -24,7 +23,7 @@ body {
 // ─── 유틸 클래스 ──────────────────────────────────────────────
 .mono {
   font-family: $font-mono;
-  font-feature-settings: 'tnum' 1;
+  font-feature-settings: "tnum" 1;
 }
 
 // ─── 앱 루트 — 모바일 뷰포트 고정 ────────────────────────────
@@ -36,5 +35,14 @@ body {
   min-height: 100%;
   position: relative;
   overflow: hidden;
-  background: $card;
+  background: $bg;
+}
+
+// ─── 포커스 접근성 ────────────────────────────────────────────
+// input/textarea는 border-color 변경으로 커스텀 포커스 상태 제공 → 제외
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid $accent;
+  outline-offset: 2px;
 }
