@@ -18,6 +18,7 @@ dist-ssr
 
 # Test reports
 tests/reports/
+tests/TEST_REPORT.md
 playwright-report/
 test-results/
 
