@@ -13,11 +13,13 @@ import type { Room } from '../types';
  * @param roomIds - 구독할 방 ID 목록 (localStorage에서 로드)
  * @returns rooms(Room 배열, createdAt 내림차순), confirmedMissingIds(Firebase가 없다고 확인한 ID Set)
  */
-export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingIds: Set<string> } {
+export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingIds: Set<string>; loading: boolean } {
   const [rooms, setRooms] = useState<Record<string, Room>>({});
   // Firebase가 snapshot.exists() === false 로 응답한 ID만 여기에 담음
   // 로딩 중(아직 응답 없음)과 확실히 없는 것을 구분하기 위해 분리
   const [confirmedMissingIds, setConfirmedMissingIds] = useState<Set<string>>(new Set());
+  // 첫 Firebase 응답을 받은 roomId를 추적 — 전부 응답 오기 전까지 loading: true
+  const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set());
 
   // join으로 비교 — Firebase key는 쉼표를 포함하지 않으므로 안전
   const key = roomIds.join(',');
@@ -26,17 +28,28 @@ export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingId
     if (roomIds.length === 0) {
       setRooms({});
       setConfirmedMissingIds(new Set());
+      setLoadedIds(new Set());
       return;
     }
+
+    setLoadedIds(new Set());
 
     const unsubscribers: (() => void)[] = [];
 
     roomIds.forEach((id) => {
       const roomRef = ref(db, `rooms/${id}`);
 
+      // 구독당 첫 응답 여부 — loadedIds 중복 추가 방지
+      let firstResponse = true;
+
       const unsub = onValue(
         roomRef,
         (snapshot) => {
+          if (firstResponse) {
+            firstResponse = false;
+            setLoadedIds((prev) => new Set([...prev, id]));
+          }
+
           if (!snapshot.exists()) {
             // Firebase가 없다고 확인 — confirmedMissingIds에 추가하고 rooms에서 제거
             setConfirmedMissingIds((prev) => new Set([...prev, id]));
@@ -72,9 +85,13 @@ export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingId
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  // roomIds가 있으나 아직 전부 응답 안 온 상태 = 로딩 중
+  const loading = roomIds.length > 0 && loadedIds.size < roomIds.length;
+
   // createdAt 내림차순 정렬 (최근 방이 위로)
   return {
     rooms: Object.values(rooms).sort((a, b) => b.createdAt - a.createdAt),
     confirmedMissingIds,
+    loading,
   };
 }

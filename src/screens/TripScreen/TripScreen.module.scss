@@ -45,6 +45,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .backBtn {
@@ -73,51 +75,6 @@
   letter-spacing: 0.1em;
 }
 
-.menuWrap {
-  position: relative;
-  z-index: 200;
-}
-
-.menuBtn {
-  padding: 4px;
-}
-
-.dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: $card;
-  border: 1px solid $line;
-  border-radius: $radius;
-  min-width: 150px;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.dropdownItem {
-  display: block;
-  width: 100%;
-  padding: 14px 16px;
-  text-align: left;
-  background: none;
-  border: none;
-  border-bottom: 1px solid $line;
-  font-size: 14px;
-  font-family: inherit;
-  color: $ink;
-  cursor: pointer;
-
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: $paper;
-  }
-}
-
-.dropdownItemDanger {
-  color: $accent;
-}
 
 // ─── 삭제 확인 다이얼로그 ────────────────────────────────────
 .dialogOverlay {
@@ -418,7 +375,7 @@
   width: 56px;
   border: none;
   background: rgba(55, 138, 221, 0.1);
-  color: #378ADD;
+  color: #378add;
   font-size: 20px;
   font-family: inherit;
   cursor: pointer;
@@ -435,7 +392,7 @@
   width: 56px;
   border: none;
   background: rgba(226, 75, 74, 0.1);
-  color: #E24B4A;
+  color: #e24b4a;
   font-size: 20px;
   font-family: inherit;
   cursor: pointer;
@@ -537,7 +494,7 @@
   flex-shrink: 0;
   display: flex;
   gap: 8px;
-  padding: 12px $screen-px 36px;
+  padding: 28px;
   background: $card;
   border-top: 1px solid $line;
 }

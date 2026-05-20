@@ -1,9 +1,9 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
-$receipt-bg:   #FBF8F1;
-$receipt-ink:  #0A0A0A;
-$receipt-mute: #8C8579;
-$receipt-line: #E5E0D6;
+$receipt-bg: #fbf8f1;
+$receipt-ink: #0a0a0a;
+$receipt-mute: #8c8579;
+$receipt-line: #e5e0d6;
 
 .card {
   background: $receipt-bg;
@@ -103,7 +103,6 @@ $receipt-line: #E5E0D6;
   gap: 8px;
   font-size: 9px;
   color: $receipt-mute;
-  padding-bottom: 8px;
   border-bottom: 1px dotted $receipt-line;
   letter-spacing: 0.08em;
   width: 100%;

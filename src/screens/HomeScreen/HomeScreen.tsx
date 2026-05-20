@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ref, query, get, orderByChild, equalTo } from "firebase/database";
 import { db } from "../../lib/firebase";
@@ -7,7 +7,9 @@ import { useRooms } from "../../hooks/useRooms";
 import { useHiddenRooms } from "../../hooks/useHiddenRooms";
 import { parseRoomId } from "../../utils/parseRoomId";
 import { formatDateLabel } from "../../utils/formatDate";
+import { LoadingBar } from "../../components/shared/LoadingBar";
 import { AvatarStack, Caps, Chevron } from "../../components/shared/atoms";
+import { DropdownMenu } from "../../components/shared/DropdownMenu";
 import s from "./HomeScreen.module.scss";
 
 /**
@@ -19,26 +21,12 @@ export default function HomeScreen() {
   const navigate = useNavigate();
   const { roomIds, addRoomId } = useLocalRooms();
   const { hiddenRoomIds } = useHiddenRooms();
-  const { rooms: allRooms } = useRooms(roomIds);
+  const { rooms: allRooms, loading } = useRooms(roomIds);
   const rooms = allRooms.filter((r) => !hiddenRoomIds.includes(r.id));
 
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [linkLoading, setLinkLoading] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // 메뉴 외부 클릭 시 닫기
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleOutsideClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [menuOpen]);
 
   const activeCount = rooms.filter((r) => r.status === "active").length;
 
@@ -90,32 +78,11 @@ export default function HomeScreen() {
             <span className={s.brandDot} />
             <span className={s.brandName}>TRIPLY</span>
           </div>
-          <div className={s.menuWrap} ref={menuRef}>
-            <button
-              className={s.menuBtn}
-              aria-label="메뉴"
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <svg width="22" height="22" viewBox="0 0 22 22">
-                <circle cx="4" cy="11" r="1.5" fill="#0A0A0A" />
-                <circle cx="11" cy="11" r="1.5" fill="#0A0A0A" />
-                <circle cx="18" cy="11" r="1.5" fill="#0A0A0A" />
-              </svg>
-            </button>
-            {menuOpen && (
-              <div className={s.dropdown}>
-                <button
-                  className={s.dropdownItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/hidden");
-                  }}
-                >
-                  숨긴 여행 보기
-                </button>
-              </div>
-            )}
-          </div>
+          <DropdownMenu
+            items={[
+              { label: "숨긴 여행 보기", onClick: () => navigate("/hidden") },
+            ]}
+          />
         </div>
 
         <div className={s.titleBlock}>
@@ -134,7 +101,13 @@ export default function HomeScreen() {
           <span className={`mono ${s.listCount}`}>{rooms.length} TRIPS</span>
         </div>
 
-        {rooms.length === 0 && (
+        {loading && (
+          <div className={s.loadingWrap}>
+            <LoadingBar label="여행 목록을 불러오고 있어요." />
+          </div>
+        )}
+
+        {!loading && rooms.length === 0 && (
           <div className={s.empty}>
             아직 여행이 없어요.
             <br />새 여행을 만들거나 초대 코드로 입장해보세요.

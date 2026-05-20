@@ -7,6 +7,7 @@ import { useLocalRooms } from "../../hooks/useLocalRooms";
 import { useHiddenRooms } from "../../hooks/useHiddenRooms";
 import { isOwner } from "../../utils/isOwner";
 import { Avatar, AvatarStack, Chevron } from "../../components/shared/atoms";
+import { DropdownMenu, type MenuItem } from "../../components/shared/DropdownMenu";
 import CharCounter from "../../components/shared/CharCounter";
 import { fmt, fmtTimestamp, amountFontSize } from "../../utils/format";
 import { formatDateLabel } from "../../utils/formatDate";
@@ -34,7 +35,6 @@ export default function TripScreen() {
 
   const [filter, setFilter] = useState<FilterCategory>("전체");
   const [addOpen, setAddOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
@@ -52,8 +52,6 @@ export default function TripScreen() {
   const [renameTitleInput, setRenameTitleInput] = useState("");
   const [renameTitleLoading, setRenameTitleLoading] = useState(false);
   const [renameTitleError, setRenameTitleError] = useState("");
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const { hideRoom } = useHiddenRooms();
 
   // 방 진입 시 localStorage에 roomId 등록 (초대 링크로 직접 진입한 경우 대비)
@@ -68,18 +66,6 @@ export default function TripScreen() {
     const id = setTimeout(() => setToast(""), 3000);
     return () => clearTimeout(id);
   }, [toast]);
-
-  // 메뉴 외부 클릭 시 닫기
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleOutsideClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [menuOpen]);
 
   // ─── 로딩 / 에러 상태 ─────────────────────────────────────
   if (loading) {
@@ -225,79 +211,23 @@ export default function TripScreen() {
           </div>
         )}
 
-        <div className={s.menuWrap} ref={menuRef}>
-          <button
-            className={s.menuBtn}
-            aria-label="메뉴"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20">
-              <circle cx="4" cy="10" r="1.5" fill="#0A0A0A" />
-              <circle cx="10" cy="10" r="1.5" fill="#0A0A0A" />
-              <circle cx="16" cy="10" r="1.5" fill="#0A0A0A" />
-            </svg>
-          </button>
-          {menuOpen && (
-            <div className={s.dropdown}>
-              {room.status === "active" && (
-                <button
-                  className={s.dropdownItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setRenameTitleInput(room.name);
-                    setRenameTitleOpen(true);
-                  }}
-                >
-                  제목 변경
-                </button>
-              )}
-              <button
-                className={s.dropdownItem}
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigator.clipboard.writeText(room.inviteCode).then(() => {
-                    setToast("복사됐어요!");
-                  });
-                }}
-              >
-                초대 코드 복사
-              </button>
-              {room.status === "active" && (
-                <button
-                  className={s.dropdownItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setAddMemberOpen(true);
-                  }}
-                >
-                  인원 추가
-                </button>
-              )}
-              {room.status === "done" && (
-                <button
-                  className={s.dropdownItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleHide();
-                  }}
-                >
-                  이 여행 숨기기
-                </button>
-              )}
-              {canDelete && (
-                <button
-                  className={`${s.dropdownItem} ${s.dropdownItemDanger}`}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setDeleteConfirmOpen(true);
-                  }}
-                >
-                  이 여행 삭제하기
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        <DropdownMenu
+          items={[
+            ...(room.status === "active"
+              ? [{ label: "제목 변경", onClick: () => { setRenameTitleInput(room.name); setRenameTitleOpen(true); } }]
+              : []),
+            { label: "초대 코드 복사", onClick: () => { navigator.clipboard.writeText(room.inviteCode).then(() => setToast("복사됐어요!")); } },
+            ...(room.status === "active"
+              ? [{ label: "인원 추가", onClick: () => setAddMemberOpen(true) }]
+              : []),
+            ...(room.status === "done"
+              ? [{ label: "이 여행 숨기기", onClick: handleHide }]
+              : []),
+            ...(canDelete
+              ? [{ label: "이 여행 삭제하기", onClick: () => setDeleteConfirmOpen(true), danger: true as const }]
+              : []),
+          ] satisfies MenuItem[]}
+        />
       </div>
 
       {/* 히어로 — 여행 이름 + 통계 */}

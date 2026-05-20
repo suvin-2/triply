@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ref, push, set } from 'firebase/database';
-import { db } from '../../lib/firebase';
-import { useLocalRooms } from '../../hooks/useLocalRooms';
-import { toFirebaseDate } from '../../utils/formatDate';
-import { generateInviteCode } from '../../utils/inviteCode';
-import { Caps, Chevron, PrimaryBtn } from '../../components/shared/atoms';
-import CharCounter from '../../components/shared/CharCounter';
-import s from './CreateScreen.module.scss';
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ref, push, set } from "firebase/database";
+import { db } from "../../lib/firebase";
+import { useLocalRooms } from "../../hooks/useLocalRooms";
+import { toFirebaseDate } from "../../utils/formatDate";
+import { generateInviteCode } from "../../utils/inviteCode";
+import { Caps, Chevron, PrimaryBtn } from "../../components/shared/atoms";
+import CharCounter from "../../components/shared/CharCounter";
+import s from "./CreateScreen.module.scss";
 
 /**
  * 2본 — 방 개설 화면.
@@ -19,23 +18,23 @@ export default function CreateScreen() {
   const navigate = useNavigate();
   const { addRoomId } = useLocalRooms();
 
-  const [name, setName] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [members, setMembers] = useState<string[]>([]);
-  const [memberInput, setMemberInput] = useState('');
+  const [memberInput, setMemberInput] = useState("");
   // isComposing: 한글 IME 조합 중 Enter 이벤트 중복 방지 (nativeEvent가 더 신뢰할 수 있어 state는 fallback용)
   const [isComposing, setIsComposing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
-  const [inviteCode, setInviteCode] = useState('');
+  const [inviteCode, setInviteCode] = useState("");
   const [copied, setCopied] = useState(false);
 
   // 종료일이 시작일보다 이른 경우 에러 (YYYY-MM-DD 문자열은 사전순 비교로 날짜 비교 가능)
   const dateError =
     startDate && endDate && endDate < startDate
-      ? '종료일이 시작일보다 이를 수 없어요'
-      : '';
+      ? "종료일이 시작일보다 이를 수 없어요"
+      : "";
 
   const canSubmit = name.trim().length > 0 && members.length >= 2 && !dateError;
 
@@ -45,7 +44,7 @@ export default function CreateScreen() {
     const v = memberInput.trim();
     if (!v || members.includes(v)) return;
     setMembers((prev) => [...prev, v]);
-    setMemberInput('');
+    setMemberInput("");
   }
 
   function removeMember(m: string) {
@@ -58,7 +57,7 @@ export default function CreateScreen() {
     try {
       const code = generateInviteCode();
       // Firebase push로 고유 roomId 생성
-      const roomRef = push(ref(db, 'rooms'));
+      const roomRef = push(ref(db, "rooms"));
       const roomId = roomRef.key!;
       const ownerToken = crypto.randomUUID();
       const fbStart = toFirebaseDate(startDate);
@@ -69,7 +68,7 @@ export default function CreateScreen() {
         startDate: fbStart,
         endDate: fbEnd,
         members,
-        status: 'active',
+        status: "active",
         createdAt: Date.now(),
         ownerToken,
         inviteCode: code,
@@ -80,8 +79,12 @@ export default function CreateScreen() {
       setInviteCode(code);
       setCreatedId(roomId);
     } catch (err) {
-      console.error('[CreateScreen] 방 생성 실패:', err);
-      alert(err instanceof Error ? err.message : '방을 만드는 데 실패했어요. 다시 시도해주세요.');
+      console.error("[CreateScreen] 방 생성 실패:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "방을 만드는 데 실패했어요. 다시 시도해주세요.",
+      );
     } finally {
       setCreating(false);
     }
@@ -106,7 +109,11 @@ export default function CreateScreen() {
     <div className={s.screen}>
       {/* 상단 바 */}
       <div className={s.topBar}>
-        <button className={s.backBtn} onClick={() => navigate('/')} aria-label="뒤로">
+        <button
+          className={s.backBtn}
+          onClick={() => navigate("/")}
+          aria-label="뒤로"
+        >
           <Chevron dir="left" size={14} color="#0A0A0A" />
         </button>
         <span className={s.stepLabel}>STEP 01 / 01</span>
@@ -161,7 +168,9 @@ export default function CreateScreen() {
 
         {/* 인원 */}
         <div className={s.fieldGroup}>
-          <Caps style={{ marginBottom: 12 }}>{`인원 (${members.length}명)`}</Caps>
+          <Caps
+            style={{ marginBottom: 12 }}
+          >{`인원 (${members.length}명)`}</Caps>
           {members.length > 0 && (
             <div className={s.memberChips}>
               {members.map((m) => (
@@ -187,13 +196,22 @@ export default function CreateScreen() {
               onCompositionEnd={() => setIsComposing(false)}
               onKeyDown={(e) => {
                 // nativeEvent.isComposing은 브라우저 동기 값이므로 state보다 신뢰도 높음
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing && !isComposing) addMember();
+                if (
+                  e.key === "Enter" &&
+                  !e.nativeEvent.isComposing &&
+                  !isComposing
+                )
+                  addMember();
               }}
               placeholder="이름 입력 후 엔터"
               maxLength={10}
               disabled={members.length >= 10}
             />
-            <button className={s.addBtn} onClick={addMember} disabled={members.length >= 10}>
+            <button
+              className={s.addBtn}
+              onClick={addMember}
+              disabled={members.length >= 10}
+            >
               + 추가
             </button>
           </div>
@@ -210,7 +228,7 @@ export default function CreateScreen() {
       {/* 하단 CTA */}
       <div className={s.bottom}>
         <PrimaryBtn onClick={handleCreate} disabled={!canSubmit || creating}>
-          <span>{creating ? '생성 중...' : '방 만들고 코드 공유'}</span>
+          <span>{creating ? "생성 중..." : "방 만들고 코드 공유"}</span>
           <Chevron dir="right" size={14} color="#fff" />
         </PrimaryBtn>
       </div>
@@ -228,10 +246,10 @@ export default function CreateScreen() {
             <div className={s.linkBox}>
               <span className={s.inviteCodeText}>{inviteCode}</span>
               <button
-                className={`${s.copyBtn} ${copied ? s.copyDone : ''}`}
+                className={`${s.copyBtn} ${copied ? s.copyDone : ""}`}
                 onClick={handleCopy}
               >
-                {copied ? '복사됨' : '복사'}
+                {copied ? "복사됨" : "복사"}
               </button>
             </div>
 

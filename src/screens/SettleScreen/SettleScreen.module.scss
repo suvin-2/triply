@@ -52,6 +52,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .backBtn {
@@ -66,56 +68,6 @@
   letter-spacing: -0.01em;
 }
 
-.menuWrap {
-  position: relative;
-  z-index: 1100;
-}
-
-.menuBtn {
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: $card;
-  border: 1px solid $line;
-  border-radius: $radius;
-  min-width: 150px;
-  z-index: 10000;
-  overflow: hidden;
-}
-
-.dropdownItem {
-  display: block;
-  width: 100%;
-  padding: 14px 16px;
-  text-align: left;
-  background: none;
-  border: none;
-  border-bottom: 1px solid $line;
-  font-size: 14px;
-  font-family: inherit;
-  color: $ink;
-  cursor: pointer;
-
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: $paper;
-  }
-}
-
-.dropdownItemDanger {
-  color: $accent;
-}
 
 .dialogDelete {
   flex: 1;
@@ -206,7 +158,6 @@
 .tabContent {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 8px;
 }
 
 // ─── 송금 내역 탭 ─────────────────────────────────────────────────
@@ -397,7 +348,7 @@
 // ─── 하단 정산 완료 버튼 ──────────────────────────────────────────
 .bottomBar {
   flex-shrink: 0;
-  padding: 12px $screen-px 36px;
+  padding: 28px;
   background: $card;
   border-top: 1px solid $line;
 }

@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ref, update, remove } from "firebase/database";
 import { useHiddenRooms } from "../../hooks/useHiddenRooms";
@@ -9,6 +9,10 @@ import { useRoom } from "../../hooks/useRoom";
 import { calcSettlement } from "../../utils/settlement";
 import { fmt } from "../../utils/format";
 import { Chevron } from "../../components/shared/atoms";
+import {
+  DropdownMenu,
+  type MenuItem,
+} from "../../components/shared/DropdownMenu";
 import ReceiptCard from "./ReceiptCard";
 import s from "./SettleScreen.module.scss";
 import { LoadingBar } from "../../components/shared/LoadingBar";
@@ -27,7 +31,6 @@ export default function SettleScreen() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [settling, setSettling] = useState(false);
   const [capturing, setCapturing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
@@ -35,21 +38,8 @@ export default function SettleScreen() {
 
   // ReceiptCard DOM 요소 — html2canvas 캡처 대상
   const receiptRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const { hideRoom } = useHiddenRooms();
-
-  // 메뉴 외부 클릭 시 닫기
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleOutsideClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [menuOpen]);
 
   if (loading) {
     return (
@@ -227,45 +217,24 @@ export default function SettleScreen() {
           <Chevron dir="left" size={14} color="#0A0A0A" />
         </button>
         <div className={s.topTitle}>정산 결과</div>
-        <div className={s.menuWrap} ref={menuRef}>
-          <button
-            className={s.menuBtn}
-            aria-label="메뉴"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20">
-              <circle cx="4" cy="10" r="1.5" fill="#0A0A0A" />
-              <circle cx="10" cy="10" r="1.5" fill="#0A0A0A" />
-              <circle cx="16" cy="10" r="1.5" fill="#0A0A0A" />
-            </svg>
-          </button>
-          {menuOpen && (
-            <div className={s.dropdown}>
-              {room.status === "done" && (
-                <button
-                  className={s.dropdownItem}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleHide();
-                  }}
-                >
-                  이 여행 숨기기
-                </button>
-              )}
-              {canDelete && (
-                <button
-                  className={`${s.dropdownItem} ${s.dropdownItemDanger}`}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setDeleteConfirmOpen(true);
-                  }}
-                >
-                  이 여행 삭제하기
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        <DropdownMenu
+          items={
+            [
+              ...(room.status === "done"
+                ? [{ label: "이 여행 숨기기", onClick: handleHide }]
+                : []),
+              ...(canDelete
+                ? [
+                    {
+                      label: "이 여행 삭제하기",
+                      onClick: () => setDeleteConfirmOpen(true),
+                      danger: true as const,
+                    },
+                  ]
+                : []),
+            ] satisfies MenuItem[]
+          }
+        />
       </div>
 
       {/* 히어로 */}

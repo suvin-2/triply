@@ -4,7 +4,6 @@
   position: absolute;
   inset: 0;
   padding-top: 20px;
-  padding-bottom: 36px;
   background: $card;
   color: $ink;
   display: flex;
@@ -228,7 +227,7 @@
 
 // ─── 하단 CTA ───────────────────────────────────────────────
 .bottom {
-  padding: 14px $screen-px 0;
+  padding: 28px;
   border-top: 1px solid $line;
 }
 
