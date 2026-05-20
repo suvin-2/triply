@@ -35,3 +35,6 @@ test-results/
 
 # claude
 CLAUDE.md
+
+# Bundle analysis
+stats.html
