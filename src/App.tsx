@@ -1,19 +1,40 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import HomeScreen from './screens/HomeScreen/HomeScreen';
+import { lazy, Suspense, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import HomeScreen from "./screens/HomeScreen/HomeScreen";
+import IntroScreen from "./screens/IntroScreen/IntroScreen";
 
 // 홈 이외 화면은 lazy — 초기 번들에서 제외해 첫 로드 속도 개선
-const CreateScreen = lazy(() => import('./screens/CreateScreen/CreateScreen'));
-const TripScreen = lazy(() => import('./screens/TripScreen/TripScreen'));
-const SettleScreen = lazy(() => import('./screens/SettleScreen/SettleScreen'));
-const HiddenRoomsScreen = lazy(() => import('./screens/HiddenRoomsScreen/HiddenRoomsScreen'));
+const CreateScreen = lazy(() => import("./screens/CreateScreen/CreateScreen"));
+const TripScreen = lazy(() => import("./screens/TripScreen/TripScreen"));
+const SettleScreen = lazy(() => import("./screens/SettleScreen/SettleScreen"));
+const HiddenRoomsScreen = lazy(() => import("./screens/HiddenRoomsScreen/HiddenRoomsScreen"));
+
+function RootRoute() {
+  const [introDone, setIntroDone] = useState(false);
+
+  if (!introDone) {
+    return <IntroScreen onComplete={() => setIntroDone(true)} />;
+  }
+
+  return (
+    <motion.div
+      style={{ position: "absolute", inset: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      <HomeScreen />
+    </motion.div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={null}>
         <Routes>
-          <Route path="/" element={<HomeScreen />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/create" element={<CreateScreen />} />
           <Route path="/room/:roomId" element={<TripScreen />} />
           <Route path="/room/:roomId/settle" element={<SettleScreen />} />

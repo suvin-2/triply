@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" rx="229" ry="229" fill="#EDE8DF"></rect>
+  <path d="M 174 102 L 850 102 L 850 908 L 821.83 934 L 793.67 908 L 765.5 934 L 737.33 908 L 709.17 934 L 681 908 L 652.83 934 L 624.67 908 L 596.5 934 L 568.33 908 L 540.17 934 L 512 908 L 483.83 934 L 455.67 908 L 427.5 934 L 399.33 908 L 371.17 934 L 343 908 L 314.83 934 L 286.67 908 L 258.5 934 L 230.33 908 L 202.17 934 L 174 908 L 174 102 Z" fill="#1A1A1A"></path>
+  <text x="512" y="505" font-family="Georgia, &#39;Times New Roman&#39;, &#39;Noto Serif KR&#39;, serif" font-weight="700" font-size="451" text-anchor="middle" dominant-baseline="central" fill="#EDE8DF">T</text>
+  <circle cx="644" cy="365" r="61" fill="#E8432D"></circle>
+</svg>
