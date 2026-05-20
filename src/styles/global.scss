@@ -1,10 +1,14 @@
 @use 'variables' as *;
 @use 'reset';
 
-// ─── Fonts ────────────────────────────────────────────────────
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
-@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css');
+// ─── Fonts (self-hosted) ──────────────────────────────────────
+// CDN 없이 같은 오리진에서 제공 — 외부 DNS/TCP 지연 없음
+// dynamic-subset: 페이지에 실제 사용된 글자만 동적 로드해 용량 최소화
+@import 'pretendard/dist/web/static/pretendard-subset.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
 
 // ─── Global ───────────────────────────────────────────────────
 body {
