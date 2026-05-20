@@ -1,21 +1,25 @@
 // ─── Colors ───────────────────────────────────────────────────
-$ink:       #0A0A0A;
-$paper:     #F4F1EA;
-$card:      #FFFFFF;
-$mute:      #8C8579;
-$line:      #E5E0D6;
-$line-hard: #1A1A1A;
-$accent:    #E8432D;
-$bg:        #EDE8DF;
+$ink: #0a0a0a;
+$paper: #f4f1ea;
+$card: #ffffff;
+$mute: #736d63;
+$line: #e5e0d6;
+$line-hard: #1a1a1a;
+$accent: #e8432d;
+$bg: #ede8df;
 
 // ─── Typography ───────────────────────────────────────────────
-$font-sans: 'Pretendard', -apple-system, system-ui, sans-serif;
-$font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+$font-sans:
+  "Pretendard Variable",
+  -apple-system,
+  system-ui,
+  sans-serif;
+$font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
 
 // ─── Radii ────────────────────────────────────────────────────
 $radius-sm: 2px;
-$radius:    4px;
+$radius: 4px;
 $radius-lg: 16px;
 
 // ─── Spacing ──────────────────────────────────────────────────
-$screen-px: 28px;   // 화면 좌우 기본 패딩
+$screen-px: 28px; // 화면 좌우 기본 패딩

@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+@use "../../styles/variables" as *;
 
 // ─── 오버레이 ────────────────────────────────────────────────
 .overlay {
@@ -183,7 +183,9 @@
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 
   &.active {
     background: $ink;
@@ -215,7 +217,9 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   max-width: 120px;
   overflow: hidden;
 
@@ -244,7 +248,7 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: $accent;
+  color: #d32f2f;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -263,7 +267,9 @@
   border-radius: $radius;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 
   &.active {
     background: $ink;

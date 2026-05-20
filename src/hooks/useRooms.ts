@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ref, onValue } from 'firebase/database';
-import { db } from '../lib/firebase';
-import type { Room } from '../types';
+import { useEffect, useState } from "react";
+import { ref, onValue } from "firebase/database";
+import { db } from "../lib/firebase";
+import type { Room } from "../types";
 
 /**
  * roomIds 배열에 해당하는 방들을 Firebase에서 동시에 실시간 구독한다.
@@ -13,7 +13,11 @@ import type { Room } from '../types';
  * @param roomIds - 구독할 방 ID 목록 (localStorage에서 로드)
  * @returns rooms(Room 배열, createdAt 내림차순), confirmedMissingIds(Firebase가 없다고 확인한 ID Set)
  */
-export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingIds: Set<string>; loading: boolean } {
+export function useRooms(roomIds: string[]): {
+  rooms: Room[];
+  confirmedMissingIds: Set<string>;
+  loading: boolean;
+} {
   const [rooms, setRooms] = useState<Record<string, Room>>({});
   // Firebase가 snapshot.exists() === false 로 응답한 ID만 여기에 담음
   // 로딩 중(아직 응답 없음)과 확실히 없는 것을 구분하기 위해 분리
@@ -22,12 +26,15 @@ export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingId
   const [loadedIds, setLoadedIds] = useState<Set<string>>(new Set());
 
   // join으로 비교 — Firebase key는 쉼표를 포함하지 않으므로 안전
-  const key = roomIds.join(',');
+  const key = roomIds.join(",");
 
   useEffect(() => {
     if (roomIds.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 구독 없이 즉시 초기화 필요한 early-return 패턴
       setRooms({});
+
       setConfirmedMissingIds(new Set());
+
       setLoadedIds(new Set());
       return;
     }
@@ -69,7 +76,7 @@ export function useRooms(roomIds: string[]): { rooms: Room[]; confirmedMissingId
           });
 
           // Firebase snapshot.val()은 rooms/{id} 구조가 보장되므로 캐스팅
-          const data = snapshot.val() as Omit<Room, 'id'>;
+          const data = snapshot.val() as Omit<Room, "id">;
           setRooms((prev) => ({ ...prev, [id]: { id, ...data } }));
         },
         (err) => {

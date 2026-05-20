@@ -1,4 +1,7 @@
 @use "../../styles/variables" as *;
+// JetBrains Mono 500/700 — 이 화면에서 처음 사용되므로 여기서 로드 (lazy chunk CSS에 포함)
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-700.css";
 
 .screen {
   position: absolute;
@@ -227,7 +230,7 @@
 
 // ─── 하단 CTA ───────────────────────────────────────────────
 .bottom {
-  padding: 28px;
+  padding: 20px;
   border-top: 1px solid $line;
 }
 

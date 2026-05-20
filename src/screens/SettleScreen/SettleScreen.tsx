@@ -9,10 +9,7 @@ import { useRoom } from "../../hooks/useRoom";
 import { calcSettlement } from "../../utils/settlement";
 import { fmt } from "../../utils/format";
 import { Chevron } from "../../components/shared/atoms";
-import {
-  DropdownMenu,
-  type MenuItem,
-} from "../../components/shared/DropdownMenu";
+import { DropdownMenu, type MenuItem } from "../../components/shared/DropdownMenu";
 import ReceiptCard from "./ReceiptCard";
 import s from "./SettleScreen.module.scss";
 import { LoadingBar } from "../../components/shared/LoadingBar";
@@ -132,6 +129,7 @@ export default function SettleScreen() {
   }
 
   function openToss(amount: number) {
+    // eslint-disable-next-line react-hooks/immutability -- 딥링크 URL 스킴 호출, React 상태 아님
     window.location.href = `supertoss://send?amount=${amount}`;
   }
 
@@ -209,20 +207,14 @@ export default function SettleScreen() {
     <div className={s.screen}>
       {/* 상단 바 */}
       <div className={s.topBar}>
-        <button
-          className={s.backBtn}
-          onClick={() => navigate(`/room/${roomId}`)}
-          aria-label="뒤로"
-        >
+        <button className={s.backBtn} onClick={() => navigate(`/room/${roomId}`)} aria-label="뒤로">
           <Chevron dir="left" size={14} color="#0A0A0A" />
         </button>
         <div className={s.topTitle}>정산 결과</div>
         <DropdownMenu
           items={
             [
-              ...(room.status === "done"
-                ? [{ label: "이 여행 숨기기", onClick: handleHide }]
-                : []),
+              ...(room.status === "done" ? [{ label: "이 여행 숨기기", onClick: handleHide }] : []),
               ...(canDelete
                 ? [
                     {
@@ -284,21 +276,13 @@ export default function SettleScreen() {
                       <span className={s.arrow}>→</span>
                       <span className={s.toName}>{t.to}</span>
                     </div>
-                    <div className={`mono ${s.transferAmount}`}>
-                      {fmt(t.amount)}원
-                    </div>
+                    <div className={`mono ${s.transferAmount}`}>{fmt(t.amount)}원</div>
                   </div>
                   <div className={s.deepLinks}>
-                    <button
-                      className={s.tossBtn}
-                      onClick={() => openToss(t.amount)}
-                    >
+                    <button className={s.tossBtn} onClick={() => openToss(t.amount)}>
                       토스
                     </button>
-                    <button
-                      className={s.kakaoBtn}
-                      onClick={() => openKakaoPay(t.amount)}
-                    >
+                    <button className={s.kakaoBtn} onClick={() => openKakaoPay(t.amount)}>
                       카카오페이
                     </button>
                   </div>
@@ -311,26 +295,13 @@ export default function SettleScreen() {
         {/* 영수증 카드 탭 */}
         {tab === "receipt" && (
           <div className={s.receiptWrap}>
-            <ReceiptCard
-              ref={receiptRef}
-              room={room}
-              transfers={transfers}
-              total={total}
-            />
+            <ReceiptCard ref={receiptRef} room={room} transfers={transfers} total={total} />
 
             <div className={s.shareActions}>
-              <button
-                className={s.saveBtn}
-                onClick={handleSave}
-                disabled={capturing}
-              >
+              <button className={s.saveBtn} onClick={handleSave} disabled={capturing}>
                 {capturing ? "처리하고 있어요." : "이미지 저장"}
               </button>
-              <button
-                className={s.shareBtn}
-                onClick={handleShare}
-                disabled={capturing}
-              >
+              <button className={s.shareBtn} onClick={handleShare} disabled={capturing}>
                 {capturing ? "처리하고 있어요." : "공유하기"}
               </button>
             </div>
@@ -344,43 +315,30 @@ export default function SettleScreen() {
           <button className={s.homeBtn} onClick={() => navigate("/")}>
             홈으로
           </button>
-          <button
-            className={s.doneBtn}
-            onClick={() => setConfirmOpen(true)}
-            disabled={settling || room.status === "done"}
-          >
-            {room.status === "done"
-              ? "이미 정산 완료된 여행이에요"
-              : "정산 완료로 표시하기"}
-          </button>
+          {room.status === "done" ? (
+            <button
+              className={s.revertBtn}
+              onClick={() => setRevertConfirmOpen(true)}
+              disabled={reverting}
+            >
+              {reverting ? "취소하고 있어요." : "정산 완료 취소하기"}
+            </button>
+          ) : (
+            <button className={s.doneBtn} onClick={() => setConfirmOpen(true)} disabled={settling}>
+              정산 완료하기
+            </button>
+          )}
         </div>
-        {room.status === "done" && (
-          <button
-            className={s.revertBtn}
-            onClick={() => setRevertConfirmOpen(true)}
-            disabled={reverting}
-          >
-            정산 완료 취소하기
-          </button>
-        )}
       </div>
 
       {/* 방 삭제 확인 다이얼로그 */}
       {deleteConfirmOpen && (
-        <div
-          className={s.dialogOverlay}
-          onClick={() => setDeleteConfirmOpen(false)}
-        >
+        <div className={s.dialogOverlay} onClick={() => setDeleteConfirmOpen(false)}>
           <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
             <p className={s.dialogTitle}>이 여행을 삭제할까요?</p>
-            <p className={s.dialogDesc}>
-              삭제하면 모든 데이터가 사라지고 복구할 수 없어요.
-            </p>
+            <p className={s.dialogDesc}>삭제하면 모든 데이터가 사라지고 복구할 수 없어요.</p>
             <div className={s.dialogBtns}>
-              <button
-                className={s.dialogCancel}
-                onClick={() => setDeleteConfirmOpen(false)}
-              >
+              <button className={s.dialogCancel} onClick={() => setDeleteConfirmOpen(false)}>
                 취소
               </button>
               <button
@@ -409,10 +367,7 @@ export default function SettleScreen() {
               방과 지출 내역은 그대로 유지돼요.
             </p>
             <div className={s.dialogBtns}>
-              <button
-                className={s.dialogCancel}
-                onClick={() => setConfirmOpen(false)}
-              >
+              <button className={s.dialogCancel} onClick={() => setConfirmOpen(false)}>
                 취소
               </button>
               <button
@@ -431,10 +386,7 @@ export default function SettleScreen() {
 
       {/* 정산 완료 취소 확인 다이얼로그 */}
       {revertConfirmOpen && (
-        <div
-          className={s.dialogOverlay}
-          onClick={() => setRevertConfirmOpen(false)}
-        >
+        <div className={s.dialogOverlay} onClick={() => setRevertConfirmOpen(false)}>
           <div className={s.dialog} onClick={(e) => e.stopPropagation()}>
             <p className={s.dialogTitle}>정산 완료를 취소할까요?</p>
             <p className={s.dialogDesc}>
@@ -443,10 +395,7 @@ export default function SettleScreen() {
               계속할까요?
             </p>
             <div className={s.dialogBtns}>
-              <button
-                className={s.dialogCancel}
-                onClick={() => setRevertConfirmOpen(false)}
-              >
+              <button className={s.dialogCancel} onClick={() => setRevertConfirmOpen(false)}>
                 취소
               </button>
               <button

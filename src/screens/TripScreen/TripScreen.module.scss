@@ -1,4 +1,7 @@
 @use "../../styles/variables" as *;
+// JetBrains Mono 500/700 — 이 화면에서 사용되므로 여기서 로드 (lazy chunk CSS에 포함)
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-700.css";
 
 .screen {
   position: absolute;
@@ -74,7 +77,6 @@
   color: $mute;
   letter-spacing: 0.1em;
 }
-
 
 // ─── 삭제 확인 다이얼로그 ────────────────────────────────────
 .dialogOverlay {
@@ -187,7 +189,7 @@
 
 .addMemberError {
   font-size: 12px;
-  color: $accent;
+  color: #d32f2f;
   margin-top: 6px;
 }
 
@@ -329,6 +331,7 @@
   color: $mute;
   text-align: center;
   margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 .emptyList {
@@ -494,7 +497,7 @@
   flex-shrink: 0;
   display: flex;
   gap: 8px;
-  padding: 28px;
+  padding: 20px;
   background: $card;
   border-top: 1px solid $line;
 }

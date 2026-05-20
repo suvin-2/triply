@@ -68,7 +68,6 @@
   letter-spacing: -0.01em;
 }
 
-
 .dialogDelete {
   flex: 1;
   padding: 14px 0;
@@ -348,7 +347,7 @@
 // ─── 하단 정산 완료 버튼 ──────────────────────────────────────────
 .bottomBar {
   flex-shrink: 0;
-  padding: 28px;
+  padding: 20px;
   background: $card;
   border-top: 1px solid $line;
 }
@@ -392,12 +391,12 @@
 }
 
 .revertBtn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 13px;
+  flex: 1;
+  padding: 16px 0;
   border-radius: $radius;
   border: 1px solid $line;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   background: transparent;
