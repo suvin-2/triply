@@ -132,6 +132,18 @@
   &[value=""] {
     color: $mute;
   }
+
+  // Android WebView에서 placeholder 텍스트 색상 적용
+  &::placeholder {
+    color: $mute;
+    font-weight: 400;
+  }
+
+  // Android WebView date input의 편집 영역 색상 (미선택 시)
+  &:not([value]) &::-webkit-datetime-edit,
+  &[value=""] &::-webkit-datetime-edit {
+    color: $mute;
+  }
 }
 
 .dateError {
@@ -181,6 +193,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
+  overflow: hidden; // Android 키보드 등장 시 버튼이 우측으로 밀려나는 현상 방지
 }
 
 .memberInput {
@@ -211,6 +224,7 @@
   border-radius: $radius;
   color: $ink;
   white-space: nowrap;
+  flex-shrink: 0; // flex 레이아웃에서 버튼이 찌그러지거나 밀려나지 않도록
 
   &:disabled {
     opacity: 0.35;

@@ -11,10 +11,20 @@ const SettleScreen = lazy(() => import("./screens/SettleScreen/SettleScreen"));
 const HiddenRoomsScreen = lazy(() => import("./screens/HiddenRoomsScreen/HiddenRoomsScreen"));
 
 function RootRoute() {
-  const [introDone, setIntroDone] = useState(false);
+  // 같은 세션 내 화면 이동 후 홈 복귀 시 인트로가 다시 나오지 않도록 sessionStorage에 유지
+  const [introDone, setIntroDone] = useState(
+    () => sessionStorage.getItem("triply_intro_done") === "1",
+  );
 
   if (!introDone) {
-    return <IntroScreen onComplete={() => setIntroDone(true)} />;
+    return (
+      <IntroScreen
+        onComplete={() => {
+          sessionStorage.setItem("triply_intro_done", "1");
+          setIntroDone(true);
+        }}
+      />
+    );
   }
 
   return (

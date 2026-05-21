@@ -128,13 +128,31 @@ export default function SettleScreen() {
     }
   }
 
+  /**
+   * 딥링크를 열도록 네이티브에 요청한다.
+   * ReactNativeWebView postMessage 브릿지를 우선 시도하고,
+   * 웹 브라우저 환경(개발/데스크톱)에서는 window.location.href 를 fallback으로 사용한다.
+   */
+  function openDeepLink(url: string) {
+    const rn = (
+      window as Window & {
+        ReactNativeWebView?: { postMessage: (msg: string) => void };
+      }
+    ).ReactNativeWebView;
+    if (rn) {
+      rn.postMessage(JSON.stringify({ type: "openDeepLink", url }));
+    } else {
+      // eslint-disable-next-line react-hooks/immutability -- 딥링크 URL 스킴 호출, React 상태 아님
+      window.location.href = url;
+    }
+  }
+
   function openToss(amount: number) {
-    // eslint-disable-next-line react-hooks/immutability -- 딥링크 URL 스킴 호출, React 상태 아님
-    window.location.href = `supertoss://send?amount=${amount}`;
+    openDeepLink(`supertoss://send?amount=${amount}`);
   }
 
   function openKakaoPay(amount: number) {
-    window.location.href = `kakaopay://transfer?amount=${amount}`;
+    openDeepLink(`kakaopay://transfer?amount=${amount}`);
   }
 
   /** receiptRef 요소를 2× 해상도 PNG Blob으로 캡처한다. */
@@ -154,17 +172,61 @@ export default function SettleScreen() {
     });
   }
 
+  /**
+   * Blob을 base64 문자열로 변환한다.
+   * data URL 접두어(data:image/png;base64,)를 제거하고 순수 base64만 반환한다.
+   */
+  function blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(",")[1]);
+      };
+      reader.onerror = () => reject(new Error("base64 변환에 실패했어요."));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  /**
+   * ReactNativeWebView 브릿지가 있으면 네이티브에 메시지를 전송하고,
+   * 없으면(웹 브라우저 환경) fallback 함수를 실행한다.
+   */
+  async function sendImageToNative(
+    type: "saveImage" | "shareImage",
+    blob: Blob,
+    filename: string,
+    webFallback: () => void,
+  ) {
+    const rn = (
+      window as Window & {
+        ReactNativeWebView?: { postMessage: (msg: string) => void };
+      }
+    ).ReactNativeWebView;
+
+    if (rn) {
+      const data = await blobToBase64(blob);
+      rn.postMessage(JSON.stringify({ type, data, filename }));
+    } else {
+      webFallback();
+    }
+  }
+
   async function handleSave() {
     if (capturing) return;
     setCapturing(true);
     try {
       const blob = await captureCard();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${roomName}-정산.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const filename = `${roomName}-정산.png`;
+      await sendImageToNative("saveImage", blob, filename, () => {
+        // 웹 브라우저 fallback — Android WebView에서는 동작하지 않음
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
     } catch (err) {
       console.error("[SettleScreen] 이미지 저장 실패:", err);
       alert("이미지 저장에 실패했어요. 다시 시도해주세요.");
@@ -178,20 +240,21 @@ export default function SettleScreen() {
     setCapturing(true);
     try {
       const blob = await captureCard();
-      const file = new File([blob], `${roomName}-정산.png`, {
-        type: "image/png",
+      const filename = `${roomName}-정산.png`;
+      await sendImageToNative("shareImage", blob, filename, async () => {
+        // 웹 브라우저 fallback — Web Share API 시도 후 미지원 시 다운로드
+        const file = new File([blob], filename, { type: "image/png" });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: `${roomName} 정산`, files: [file] });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
       });
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: `${roomName} 정산`, files: [file] });
-      } else {
-        // Web Share API 미지원 환경 — 이미지 다운로드로 대체
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${roomName}-정산.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
     } catch (err) {
       // 사용자가 공유 취소한 경우(AbortError)는 에러 아님
       if ((err as Error).name !== "AbortError") {

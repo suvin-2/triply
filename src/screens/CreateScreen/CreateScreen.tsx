@@ -32,9 +32,7 @@ export default function CreateScreen() {
 
   // 종료일이 시작일보다 이른 경우 에러 (YYYY-MM-DD 문자열은 사전순 비교로 날짜 비교 가능)
   const dateError =
-    startDate && endDate && endDate < startDate
-      ? "종료일이 시작일보다 이를 수 없어요"
-      : "";
+    startDate && endDate && endDate < startDate ? "종료일이 시작일보다 이를 수 없어요" : "";
 
   const canSubmit = name.trim().length > 0 && members.length >= 2 && !dateError;
 
@@ -80,11 +78,7 @@ export default function CreateScreen() {
       setCreatedId(roomId);
     } catch (err) {
       console.error("[CreateScreen] 방 생성 실패:", err);
-      alert(
-        err instanceof Error
-          ? err.message
-          : "방을 만드는 데 실패했어요. 다시 시도해주세요.",
-      );
+      alert(err instanceof Error ? err.message : "방을 만드는 데 실패했어요. 다시 시도해주세요.");
     } finally {
       setCreating(false);
     }
@@ -109,11 +103,7 @@ export default function CreateScreen() {
     <div className={s.screen}>
       {/* 상단 바 */}
       <div className={s.topBar}>
-        <button
-          className={s.backBtn}
-          onClick={() => navigate("/")}
-          aria-label="뒤로"
-        >
+        <button className={s.backBtn} onClick={() => navigate("/")} aria-label="뒤로">
           <Chevron dir="left" size={14} color="#0A0A0A" />
         </button>
         <span className={s.stepLabel}>STEP 01 / 01</span>
@@ -152,6 +142,7 @@ export default function CreateScreen() {
               type="date"
               className={s.dateInput}
               value={startDate}
+              placeholder="시작일"
               onChange={(e) => setStartDate(e.target.value)}
             />
             <span className={s.dateSep}>—</span>
@@ -160,6 +151,7 @@ export default function CreateScreen() {
               className={s.dateInput}
               value={endDate}
               min={startDate || undefined}
+              placeholder="종료일"
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
@@ -168,9 +160,7 @@ export default function CreateScreen() {
 
         {/* 인원 */}
         <div className={s.fieldGroup}>
-          <Caps
-            style={{ marginBottom: 12 }}
-          >{`인원 (${members.length}명)`}</Caps>
+          <Caps style={{ marginBottom: 12 }}>{`인원 (${members.length}명)`}</Caps>
           {members.length > 0 && (
             <div className={s.memberChips}>
               {members.map((m) => (
@@ -196,22 +186,13 @@ export default function CreateScreen() {
               onCompositionEnd={() => setIsComposing(false)}
               onKeyDown={(e) => {
                 // nativeEvent.isComposing은 브라우저 동기 값이므로 state보다 신뢰도 높음
-                if (
-                  e.key === "Enter" &&
-                  !e.nativeEvent.isComposing &&
-                  !isComposing
-                )
-                  addMember();
+                if (e.key === "Enter" && !e.nativeEvent.isComposing && !isComposing) addMember();
               }}
               placeholder="이름 입력 후 엔터"
               maxLength={10}
               disabled={members.length >= 10}
             />
-            <button
-              className={s.addBtn}
-              onClick={addMember}
-              disabled={members.length >= 10}
-            >
+            <button className={s.addBtn} onClick={addMember} disabled={members.length >= 10}>
               + 추가
             </button>
           </div>
@@ -245,10 +226,7 @@ export default function CreateScreen() {
 
             <div className={s.linkBox}>
               <span className={s.inviteCodeText}>{inviteCode}</span>
-              <button
-                className={`${s.copyBtn} ${copied ? s.copyDone : ""}`}
-                onClick={handleCopy}
-              >
+              <button className={`${s.copyBtn} ${copied ? s.copyDone : ""}`} onClick={handleCopy}>
                 {copied ? "복사됨" : "복사"}
               </button>
             </div>
