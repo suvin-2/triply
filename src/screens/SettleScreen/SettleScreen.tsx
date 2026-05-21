@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ref, update, remove } from "firebase/database";
 import { useHiddenRooms } from "../../hooks/useHiddenRooms";
@@ -35,8 +35,51 @@ export default function SettleScreen() {
 
   // ReceiptCard DOM 요소 — html2canvas 캡처 대상
   const receiptRef = useRef<HTMLDivElement>(null);
+  // 탭 전환 시 pre-render된 blob 캐시 — 저장/공유 시 재캡처 없이 즉시 사용
+  const capturedBlobRef = useRef<Blob | null>(null);
+  const [saveDone, setSaveDone] = useState(false);
 
   const { hideRoom } = useHiddenRooms();
+
+  /**
+   * 영수증 카드 탭으로 전환 시 미리 캡처해 capturedBlobRef에 캐시한다.
+   * 저장/공유 버튼 탭 시 재렌더링 없이 즉시 사용 가능.
+   */
+  useEffect(() => {
+    if (tab !== "receipt") return;
+    capturedBlobRef.current = null; // 탭 재진입 시 이전 캐시 초기화
+    captureCard()
+      .then((blob) => {
+        capturedBlobRef.current = blob;
+      })
+      .catch(() => {}); // pre-render 실패해도 버튼 탭 시 재시도
+  }, [tab]);
+
+  /**
+   * 네이티브 → 웹 콜백 등록.
+   * imageSaved: 갤러리 저장 완료 / imageShared: 공유 시트 오픈 완료 / imageError: 오류
+   */
+  useEffect(() => {
+    (
+      window as Window & {
+        __triplyCallback?: (result: { type: string; message?: string }) => void;
+      }
+    ).__triplyCallback = (result) => {
+      if (result.type === "imageSaved") {
+        setCapturing(false);
+        setSaveDone(true);
+        setTimeout(() => setSaveDone(false), 2500);
+      } else if (result.type === "imageShared") {
+        setCapturing(false);
+      } else if (result.type === "imageError") {
+        setCapturing(false);
+        alert(result.message ?? "이미지 처리에 실패했어요. 다시 시도해주세요.");
+      }
+    };
+    return () => {
+      delete (window as Window & { __triplyCallback?: unknown }).__triplyCallback;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -142,7 +185,6 @@ export default function SettleScreen() {
     if (rn) {
       rn.postMessage(JSON.stringify({ type: "openDeepLink", url }));
     } else {
-      // eslint-disable-next-line react-hooks/immutability -- 딥링크 URL 스킴 호출, React 상태 아님
       window.location.href = url;
     }
   }
@@ -151,11 +193,13 @@ export default function SettleScreen() {
     openDeepLink(`supertoss://send?amount=${amount}`);
   }
 
-  function openKakaoPay(amount: number) {
-    openDeepLink(`kakaopay://transfer?amount=${amount}`);
+  function openKakaoPay() {
+    // kakaopay://transfer?amount=X 는 앱이 지원하지 않는 경로 → "항목을 찾을 수 없습니다" 오류
+    // 앱 홈을 열고 사용자가 화면에 표시된 금액을 직접 입력하도록 변경
+    openDeepLink("kakaopay://");
   }
 
-  /** receiptRef 요소를 2× 해상도 PNG Blob으로 캡처한다. */
+  /** receiptRef 요소를 JPEG(quality 0.85)로 캡처한다. PNG 대비 크기 3-5배 절감. */
   async function captureCard(): Promise<Blob> {
     if (!receiptRef.current) throw new Error("영수증 카드를 찾을 수 없어요.");
     const canvas = await html2canvas(receiptRef.current, {
@@ -165,16 +209,20 @@ export default function SettleScreen() {
       logging: false,
     });
     return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("이미지 변환에 실패했어요."));
-      }, "image/png");
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("이미지 변환에 실패했어요."));
+        },
+        "image/jpeg",
+        0.85,
+      );
     });
   }
 
   /**
    * Blob을 base64 문자열로 변환한다.
-   * data URL 접두어(data:image/png;base64,)를 제거하고 순수 base64만 반환한다.
+   * data URL 접두어(data:...;base64,)를 제거하고 순수 base64만 반환한다.
    */
   function blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -188,37 +236,29 @@ export default function SettleScreen() {
     });
   }
 
-  /**
-   * ReactNativeWebView 브릿지가 있으면 네이티브에 메시지를 전송하고,
-   * 없으면(웹 브라우저 환경) fallback 함수를 실행한다.
-   */
-  async function sendImageToNative(
-    type: "saveImage" | "shareImage",
-    blob: Blob,
-    filename: string,
-    webFallback: () => void,
-  ) {
-    const rn = (
+  /** ReactNativeWebView 브릿지 참조 헬퍼 */
+  function getRN() {
+    return (
       window as Window & {
         ReactNativeWebView?: { postMessage: (msg: string) => void };
       }
     ).ReactNativeWebView;
-
-    if (rn) {
-      const data = await blobToBase64(blob);
-      rn.postMessage(JSON.stringify({ type, data, filename }));
-    } else {
-      webFallback();
-    }
   }
 
   async function handleSave() {
     if (capturing) return;
     setCapturing(true);
     try {
-      const blob = await captureCard();
-      const filename = `${roomName}-정산.png`;
-      await sendImageToNative("saveImage", blob, filename, () => {
+      // pre-render 캐시가 있으면 즉시 사용, 없으면 캡처
+      const blob = capturedBlobRef.current ?? (await captureCard());
+      capturedBlobRef.current = blob;
+      const filename = `${roomName}-정산.jpg`;
+      const rn = getRN();
+      if (rn) {
+        const data = await blobToBase64(blob);
+        rn.postMessage(JSON.stringify({ type: "saveImage", data, filename }));
+        // capturing 해제는 __triplyCallback(imageSaved / imageError)에서 처리
+      } else {
         // 웹 브라우저 fallback — Android WebView에서는 동작하지 않음
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -226,11 +266,11 @@ export default function SettleScreen() {
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
-      });
+        setCapturing(false);
+      }
     } catch (err) {
       console.error("[SettleScreen] 이미지 저장 실패:", err);
       alert("이미지 저장에 실패했어요. 다시 시도해주세요.");
-    } finally {
       setCapturing(false);
     }
   }
@@ -239,11 +279,17 @@ export default function SettleScreen() {
     if (capturing) return;
     setCapturing(true);
     try {
-      const blob = await captureCard();
-      const filename = `${roomName}-정산.png`;
-      await sendImageToNative("shareImage", blob, filename, async () => {
-        // 웹 브라우저 fallback — Web Share API 시도 후 미지원 시 다운로드
-        const file = new File([blob], filename, { type: "image/png" });
+      const blob = capturedBlobRef.current ?? (await captureCard());
+      capturedBlobRef.current = blob;
+      const filename = `${roomName}-정산.jpg`;
+      const rn = getRN();
+      if (rn) {
+        const data = await blobToBase64(blob);
+        rn.postMessage(JSON.stringify({ type: "shareImage", data, filename }));
+        // capturing 해제는 __triplyCallback(imageShared / imageError)에서 처리
+      } else {
+        // 웹 브라우저 fallback
+        const file = new File([blob], filename, { type: "image/jpeg" });
         if (navigator.share && navigator.canShare({ files: [file] })) {
           await navigator.share({ title: `${roomName} 정산`, files: [file] });
         } else {
@@ -254,14 +300,13 @@ export default function SettleScreen() {
           a.click();
           URL.revokeObjectURL(url);
         }
-      });
+        setCapturing(false);
+      }
     } catch (err) {
-      // 사용자가 공유 취소한 경우(AbortError)는 에러 아님
       if ((err as Error).name !== "AbortError") {
         console.error("[SettleScreen] 공유 실패:", err);
         alert("공유에 실패했어요. 다시 시도해주세요.");
       }
-    } finally {
       setCapturing(false);
     }
   }
@@ -345,7 +390,7 @@ export default function SettleScreen() {
                     <button className={s.tossBtn} onClick={() => openToss(t.amount)}>
                       토스
                     </button>
-                    <button className={s.kakaoBtn} onClick={() => openKakaoPay(t.amount)}>
+                    <button className={s.kakaoBtn} onClick={() => openKakaoPay()}>
                       카카오페이
                     </button>
                   </div>
@@ -368,6 +413,7 @@ export default function SettleScreen() {
                 {capturing ? "처리하고 있어요." : "공유하기"}
               </button>
             </div>
+            {saveDone && <div className={s.saveToast}>갤러리에 저장됐어요</div>}
           </div>
         )}
       </div>
