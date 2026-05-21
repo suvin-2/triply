@@ -139,6 +139,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: $ink;
 }
 
 .roomMeta {
@@ -194,6 +195,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   white-space: nowrap;
+  color: $ink;
 }
 
 .memberLabel {
