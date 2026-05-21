@@ -139,7 +139,7 @@
 
 // ─── 필드 섹션 ───────────────────────────────────────────────
 .fieldSection {
-  padding: 16px 0 8px;
+  padding: 16px 0 16px;
   border-bottom: 1px solid $line;
 }
 
@@ -156,6 +156,7 @@
 .titleInput {
   width: 100%;
   border: none;
+  border-bottom: 1px solid $ink;
   font-family: inherit;
   font-size: 18px;
   font-weight: 600;

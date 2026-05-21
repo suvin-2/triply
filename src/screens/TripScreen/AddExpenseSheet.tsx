@@ -39,8 +39,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
 
   const numAmount = parseInt(amount || "0", 10) || 0;
   const perPerson = splitWith.length > 0 ? numAmount / splitWith.length : 0;
-  const canSubmit =
-    title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
+  const canSubmit = title.trim().length > 0 && numAmount > 0 && splitWith.length > 0;
   const allSelected = splitWith.length === room.members.length;
 
   function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -56,9 +55,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
 
   function toggleParticipant(member: string) {
     setSplitWith((prev) =>
-      prev.includes(member)
-        ? prev.filter((x) => x !== member)
-        : [...prev, member],
+      prev.includes(member) ? prev.filter((x) => x !== member) : [...prev, member],
     );
   }
 
@@ -89,10 +86,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
   }
 
   return (
-    <div
-      className={`${s.overlay} ${visible ? s.visible : ""}`}
-      onClick={onClose}
-    >
+    <div className={`${s.overlay} ${visible ? s.visible : ""}`} onClick={onClose}>
       <div
         className={`${s.sheet} ${visible ? s.visible : ""}`}
         onClick={(e) => e.stopPropagation()}
@@ -110,11 +104,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
           </div>
           <button className={s.closeBtn} onClick={onClose} aria-label="닫기">
             <svg width="18" height="18" viewBox="0 0 18 18">
-              <path
-                d="M2 2L16 16M16 2L2 16"
-                stroke="#0A0A0A"
-                strokeWidth="1.6"
-              />
+              <path d="M2 2L16 16M16 2L2 16" stroke="#0A0A0A" strokeWidth="1.6" />
             </svg>
           </button>
         </div>
@@ -122,10 +112,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
         {/* 스크롤 영역 */}
         <div className={s.scrollArea}>
           {/* 금액 — 히어로 디스플레이 (탭하면 네이티브 키패드 올라옴) */}
-          <div
-            className={s.amountBlock}
-            onClick={() => inputRef.current?.focus()}
-          >
+          <div className={s.amountBlock} onClick={() => inputRef.current?.focus()}>
             <input
               ref={inputRef}
               className={s.amountInput}
@@ -139,8 +126,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
             <div
               className={`mono ${s.amountDisplay} ${numAmount === 0 ? s.empty : s.filled}`}
               style={{
-                fontSize:
-                  numAmount > 0 ? amountFontSize(numAmount, 56) : undefined,
+                fontSize: numAmount > 0 ? amountFontSize(numAmount, 56) : undefined,
               }}
             >
               {numAmount === 0 ? "0" : fmt(numAmount)}
@@ -148,8 +134,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
             </div>
             {numAmount > 0 && splitWith.length > 0 && (
               <div className={s.perPersonLabel}>
-                1인당{" "}
-                <span className={s.perPersonAmount}>{fmt(perPerson)}</span>원
+                1인당 <span className={s.perPersonAmount}>{fmt(perPerson)}</span>원
               </div>
             )}
           </div>
@@ -231,9 +216,7 @@ export default function AddExpenseSheet({ room, onClose, onError }: Props) {
                       <Avatar name={member} size={22} dark={!on} />
                       <span className={s.participantName}>{member}</span>
                     </div>
-                    <div
-                      className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}
-                    >
+                    <div className={`${s.checkbox} ${on ? s.checked : s.unchecked}`}>
                       {on && (
                         <svg width="12" height="10" viewBox="0 0 12 10">
                           <path

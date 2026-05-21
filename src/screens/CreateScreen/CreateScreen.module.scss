@@ -106,10 +106,32 @@
   text-align: center;
 }
 
-.dateInput {
+// date input을 감싸는 wrapper — placeholder overlay를 position:absolute로 올림
+.dateInputWrapper {
   flex: 1;
   min-width: 0;
-  width: 0; // flex: 1이 실제 너비를 결정하도록 강제
+  position: relative;
+}
+
+// 값이 없을 때 보여주는 커스텀 placeholder — input type="date"는 Android에서 placeholder 무시
+.datePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-family: $font-mono;
+  color: $mute;
+  font-weight: 400;
+  pointer-events: all;
+  cursor: pointer;
+  background: $card; // 네이티브 date input chrome을 덮어 웹/Android 동일하게 보이게 함
+  border-bottom: 1px solid $ink; // 덮인 input의 border-bottom을 오버레이에 복원
+}
+
+.dateInput {
+  width: 100%; // wrapper가 flex:1을 받으므로 input은 100%로 채움
   padding: 12px 0;
   background: transparent;
   border: none;
@@ -193,11 +215,11 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
-  overflow: hidden; // Android 키보드 등장 시 버튼이 우측으로 밀려나는 현상 방지
 }
 
 .memberInput {
   flex: 1;
+  min-width: 0; // flex 기본값 min-width:auto 를 0으로 덮어 버튼 밀림 방지
   padding: 14px 0;
   background: transparent;
   border: none;
