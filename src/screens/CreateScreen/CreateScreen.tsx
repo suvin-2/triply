@@ -64,7 +64,7 @@ export default function CreateScreen() {
    * showPicker()는 user gesture 내 동기 호출 시 picker를 직접 열 수 있다 (Chrome 99+/Android).
    * 미지원 환경은 focus()로 폴백하고, 일부 Android 기기를 위해 setTimeout(0)도 시도한다.
    */
-  function focusDateInput(ref: React.RefObject<HTMLInputElement>) {
+  function focusDateInput(ref: React.RefObject<HTMLInputElement | null>) {
     const input = ref.current;
     if (!input) return;
     input.focus();
