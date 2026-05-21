@@ -121,7 +121,8 @@ export default function SettleScreen() {
   // async 클로저에서 TypeScript가 room을 다시 null로 볼 수 있으므로 미리 캡처
   const roomName = room.name;
 
-  const canDelete = isOwner(roomId!, room.ownerToken) && room.status === "done";
+  const canSettle = isOwner(roomId!, room.ownerToken);
+  const canDelete = canSettle && room.status === "done";
 
   async function handleDelete() {
     if (deleting) return;
@@ -407,13 +408,13 @@ export default function SettleScreen() {
 
             <div className={s.shareActions}>
               <button className={s.saveBtn} onClick={handleSave} disabled={capturing}>
-                {capturing ? "처리하고 있어요." : "이미지 저장"}
+                이미지 저장
               </button>
               <button className={s.shareBtn} onClick={handleShare} disabled={capturing}>
-                {capturing ? "처리하고 있어요." : "공유하기"}
+                공유하기
               </button>
             </div>
-            {saveDone && <div className={s.saveToast}>갤러리에 저장됐어요</div>}
+            {saveDone && <div className={s.saveToast}>이미지 저장이 완료되었어요!</div>}
           </div>
         )}
       </div>
@@ -424,19 +425,24 @@ export default function SettleScreen() {
           <button className={s.homeBtn} onClick={() => navigate("/")}>
             홈으로
           </button>
-          {room.status === "done" ? (
-            <button
-              className={s.revertBtn}
-              onClick={() => setRevertConfirmOpen(true)}
-              disabled={reverting}
-            >
-              {reverting ? "취소하고 있어요." : "정산 완료 취소하기"}
-            </button>
-          ) : (
-            <button className={s.doneBtn} onClick={() => setConfirmOpen(true)} disabled={settling}>
-              정산 완료하기
-            </button>
-          )}
+          {canSettle &&
+            (room.status === "done" ? (
+              <button
+                className={s.revertBtn}
+                onClick={() => setRevertConfirmOpen(true)}
+                disabled={reverting}
+              >
+                {reverting ? "취소하고 있어요." : "정산 완료 취소하기"}
+              </button>
+            ) : (
+              <button
+                className={s.doneBtn}
+                onClick={() => setConfirmOpen(true)}
+                disabled={settling}
+              >
+                정산 완료하기
+              </button>
+            ))}
         </div>
       </div>
 
