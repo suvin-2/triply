@@ -221,9 +221,12 @@ export default function TripScreen() {
               {
                 label: "초대 코드 복사",
                 onClick: () => {
-                  navigator.clipboard
-                    .writeText(room.inviteCode)
-                    .then(() => setToast("복사됐어요!"));
+                  navigator.clipboard.writeText(room.inviteCode).then(() => {
+                    // Android 네이티브 WebView는 클립보드 복사 시 시스템 토스트를 자동 표시하므로 생략
+                    const isNative = !!(window as Window & { ReactNativeWebView?: unknown })
+                      .ReactNativeWebView;
+                    if (!isNative) setToast("복사됐어요!");
+                  });
                 },
               },
               ...(room.status === "active"
@@ -547,9 +550,10 @@ function ExpenseItem({ expense, canEdit, isSwiped, onSwipe, onEdit, onDelete }: 
   const startX = useRef(0);
   const startY = useRef(0);
   const dragging = useRef(false);
+  // 제스처 시작 시점의 열림 위치를 기억 — moveGesture에서 delta 방식 계산에 사용
+  const startOffset = useRef(0);
 
-  const ACTION_W = canEdit ? 112 : 56; // 수정(56) + 삭제(56) 또는 삭제(56)만
-  const THRESHOLD = 60;
+  const ACTION_W = 112; // 수정(56) + 삭제(56)
 
   // 외부에서 스와이프 닫기 요청 시 offset 초기화
   useEffect(() => {
@@ -558,32 +562,39 @@ function ExpenseItem({ expense, canEdit, isSwiped, onSwipe, onEdit, onDelete }: 
   }, [isSwiped]);
 
   function startGesture(x: number, y: number) {
+    // 정산 완료 상태에서는 스와이프 완전 차단
+    if (!canEdit) return;
     startX.current = x;
     startY.current = y;
     dragging.current = true;
     setTouchAction("none");
+    // 현재 열림 위치를 offset에 동기화 — 열린 카드에서 드래그 시작 시 시각적 점프 방지
+    const initial = isSwiped ? ACTION_W : 0;
+    startOffset.current = initial;
+    setOffset(initial);
   }
 
   function moveGesture(x: number, y: number) {
     if (!dragging.current) return;
-    const dx = startX.current - x;
+    const dx = startX.current - x; // 왼쪽이 양수
     const dy = Math.abs(startY.current - y);
     // 세로 스크롤이면 스와이프 취소하고 기본 스크롤 허용
     if (dy > Math.abs(dx)) {
-      setOffset(0);
+      setOffset(startOffset.current); // 스크롤 감지 시 시작 위치로 복원
       dragging.current = false;
       setTouchAction("pan-y");
       return;
     }
-    if (dx > 0) setOffset(Math.min(dx, ACTION_W));
-    else setOffset(0);
+    // 시작 위치 기준 delta 적용 — 열린 상태에서 우방향 스와이프 시 부드럽게 닫힘
+    setOffset(Math.max(0, Math.min(startOffset.current + dx, ACTION_W)));
   }
 
   function endGesture() {
     if (!dragging.current) return;
     dragging.current = false;
     setTouchAction("pan-y");
-    if (offset >= THRESHOLD) {
+    // 중간점(ACTION_W / 2) 기준으로 열기/닫기 결정
+    if (offset >= ACTION_W / 2) {
       setOffset(ACTION_W);
       onSwipe(expense.id);
     } else {

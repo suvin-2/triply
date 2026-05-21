@@ -414,7 +414,6 @@ export default function SettleScreen() {
                 공유하기
               </button>
             </div>
-            {saveDone && <div className={s.saveToast}>이미지 저장이 완료되었어요!</div>}
           </div>
         )}
       </div>
@@ -527,6 +526,8 @@ export default function SettleScreen() {
           </div>
         </div>
       )}
+
+      {saveDone && <div className={s.saveToast}>이미지 저장이 완료되었어요!</div>}
     </div>
   );
 }
