@@ -97,7 +97,11 @@ export default function CreateScreen() {
       // Firebase push로 고유 roomId 생성
       const roomRef = push(ref(db, "rooms"));
       const roomId = roomRef.key!;
-      const ownerToken = crypto.randomUUID();
+      // const ownerToken = crypto.randomUUID();
+      const ownerToken = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
       const fbStart = toFirebaseDate(startDate);
       // endDate가 비어 있으면 startDate로 채워 당일치기로 처리
       const fbEnd = endDate ? toFirebaseDate(endDate) : fbStart;

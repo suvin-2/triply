@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import HomeScreen from "./screens/HomeScreen/HomeScreen";
 import IntroScreen from "./screens/IntroScreen/IntroScreen";
 
@@ -28,14 +27,9 @@ function RootRoute() {
   }
 
   return (
-    <motion.div
-      style={{ position: "absolute", inset: 0 }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div style={{ position: "absolute", inset: 0 }}>
       <HomeScreen />
-    </motion.div>
+    </div>
   );
 }
 

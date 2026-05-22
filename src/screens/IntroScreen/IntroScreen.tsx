@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import s from "./IntroScreen.module.scss";
 
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
 interface Props {
   onComplete: () => void;
 }
@@ -17,7 +25,11 @@ export default function IntroScreen({ onComplete }: Props) {
     // 2.5초 후 페이드아웃 시작
     const fadeTimer = setTimeout(() => setFading(true), 2500);
     // 페이드아웃(0.4s) 완료 후 홈 전환
-    const doneTimer = setTimeout(onComplete, 2900);
+    const doneTimer = setTimeout(() => {
+      // 네이티브에 인트로 완료 알림
+      window.ReactNativeWebView?.postMessage(JSON.stringify({ type: "introComplete" }));
+      onComplete();
+    }, 2900);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(doneTimer);

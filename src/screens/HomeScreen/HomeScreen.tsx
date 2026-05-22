@@ -78,18 +78,13 @@ export default function HomeScreen() {
             <span className={s.brandDot} />
             <span className={s.brandName}>TRIPLY</span>
           </div>
-          <DropdownMenu
-            items={[
-              { label: "숨긴 여행 보기", onClick: () => navigate("/hidden") },
-            ]}
-          />
+          <DropdownMenu items={[{ label: "숨긴 여행 보기", onClick: () => navigate("/hidden") }]} />
         </div>
 
         <div className={s.titleBlock}>
           <h1 className={s.title}>MY TRIPS</h1>
           <p className={s.subtitle}>
-            진행 중인 여행{" "}
-            <strong className={s.subtitleBold}>{activeCount}</strong>건
+            진행 중인 여행 <strong className={s.subtitleBold}>{activeCount}</strong>건
           </p>
         </div>
       </div>
@@ -115,11 +110,7 @@ export default function HomeScreen() {
         )}
 
         {rooms.map((room) => (
-          <button
-            key={room.id}
-            className={s.roomItem}
-            onClick={() => navigate(`/room/${room.id}`)}
-          >
+          <button key={room.id} className={s.roomItem} onClick={() => navigate(`/room/${room.id}`)}>
             <div className={s.roomRow}>
               <div className={s.roomLeft}>
                 <div className={s.roomNameRow}>
@@ -141,9 +132,7 @@ export default function HomeScreen() {
               </div>
 
               <div className={`${s.memberCountWrapper} 22222`}>
-                <div className={`mono ${s.memberCount}`}>
-                  {room.members.length}
-                </div>
+                <div className={`mono ${s.memberCount}`}>{room.members.length}</div>
                 <div className={s.memberLabel}>명</div>
               </div>
             </div>
@@ -171,17 +160,9 @@ export default function HomeScreen() {
             disabled={linkLoading}
           >
             {linkLoading ? (
-              <span
-                style={{ fontSize: 11, fontFamily: "inherit", color: "#fff" }}
-              >
-                확인중
-              </span>
+              <span style={{ fontSize: 11, fontFamily: "inherit", color: "#fff" }}>확인중</span>
             ) : (
-              <Chevron
-                dir="right"
-                size={14}
-                color={link.trim() ? "#fff" : "#0A0A0A"}
-              />
+              <Chevron dir="right" size={14} color={link.trim() ? "#fff" : "#0A0A0A"} />
             )}
           </button>
         </div>

@@ -35,12 +35,13 @@ a {
 #root {
   display: flex;
   flex-direction: column;
-  max-width: 390px;
+  max-width: 100%;
   margin: 0 auto;
   min-height: 100%;
   position: relative;
   overflow: hidden;
-  background: $bg;
+  // background: $bg;
+  background: #ffffff;
 }
 
 // ─── 포커스 접근성 ────────────────────────────────────────────
