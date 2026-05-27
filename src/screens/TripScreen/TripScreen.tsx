@@ -102,7 +102,8 @@ export default function TripScreen() {
   }
 
   // ─── 방장 여부 + 액션 핸들러 ──────────────────────────────
-  const canDelete = isOwner(roomId!, room.ownerToken) && room.status === "done";
+  const canDelete =
+    isOwner(roomId!, room.ownerToken) && (room.status === "done" || room.expenses.length === 0);
 
   async function handleDelete() {
     if (deleting) return;
