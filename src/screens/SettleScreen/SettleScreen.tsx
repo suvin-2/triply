@@ -11,6 +11,7 @@ import { fmt } from "../../utils/format";
 import { Chevron } from "../../components/shared/atoms";
 import { DropdownMenu, type MenuItem } from "../../components/shared/DropdownMenu";
 import ReceiptCard from "./ReceiptCard";
+import PaymentSheet from "./PaymentSheet";
 import s from "./SettleScreen.module.scss";
 import { LoadingBar } from "../../components/shared/LoadingBar";
 
@@ -32,6 +33,11 @@ export default function SettleScreen() {
   const [deleting, setDeleting] = useState(false);
   const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
   const [reverting, setReverting] = useState(false);
+  const [selectedTransfer, setSelectedTransfer] = useState<{
+    from: string;
+    to: string;
+    amount: number;
+  } | null>(null);
 
   // ReceiptCard DOM 요소 — html2canvas 캡처 대상
   const receiptRef = useRef<HTMLDivElement>(null);
@@ -378,24 +384,19 @@ export default function SettleScreen() {
               </div>
             ) : (
               transfers.map((t, i) => (
-                <div key={i} className={s.transferRow}>
-                  <div className={s.transferInfo}>
-                    <div className={s.transferParties}>
-                      <span className={s.fromName}>{t.from}</span>
-                      <span className={s.arrow}>→</span>
-                      <span className={s.toName}>{t.to}</span>
-                    </div>
-                    <div className={`mono ${s.transferAmount}`}>{fmt(t.amount)}원</div>
+                <button
+                  key={i}
+                  className={s.transferRow}
+                  onClick={() => setSelectedTransfer(t)}
+                  aria-label={`${t.from}에서 ${t.to}로 ${fmt(t.amount)}원 송금`}
+                >
+                  <div className={s.transferParties}>
+                    <span className={s.fromName}>{t.from}</span>
+                    <span className={s.arrow}>→</span>
+                    <span className={s.toName}>{t.to}</span>
                   </div>
-                  <div className={s.deepLinks}>
-                    <button className={s.tossBtn} onClick={() => openToss(t.amount)}>
-                      토스
-                    </button>
-                    <button className={s.kakaoBtn} onClick={() => openKakaoPay()}>
-                      카카오페이
-                    </button>
-                  </div>
-                </div>
+                  <div className={`mono ${s.transferAmount}`}>{fmt(t.amount)}원</div>
+                </button>
               ))
             )}
           </div>
@@ -525,6 +526,15 @@ export default function SettleScreen() {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedTransfer !== null && (
+        <PaymentSheet
+          transfer={selectedTransfer}
+          onToss={openToss}
+          onKakaoPay={openKakaoPay}
+          onClose={() => setSelectedTransfer(null)}
+        />
       )}
 
       {saveDone && <div className={s.saveToast}>이미지 저장이 완료되었어요!</div>}

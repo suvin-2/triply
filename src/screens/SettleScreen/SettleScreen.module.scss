@@ -181,87 +181,68 @@
 }
 
 .transferRow {
-  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
   border-bottom: 1px solid $line;
+  width: 100%;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
 
   &:last-child {
     border-bottom: none;
   }
-}
 
-.transferInfo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .transferParties {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .fromName {
   font-size: 15px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .arrow {
   font-size: 13px;
   color: $mute;
+  flex-shrink: 0;
 }
 
 .toName {
   font-size: 15px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .transferAmount {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.03em;
-}
-
-.deepLinks {
-  display: flex;
-  gap: 8px;
-}
-
-.tossBtn {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: $radius;
-  border: 1px solid $line;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  background: transparent;
-  color: $ink;
-  transition: background 0.1s;
-
-  &:active {
-    background: $line;
-  }
-}
-
-.kakaoBtn {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: $radius;
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  background: #fee500;
-  color: #1a1400;
-  transition: opacity 0.1s;
-
-  &:active {
-    opacity: 0.8;
-  }
+  flex-shrink: 0;
 }
 
 // ─── 영수증 카드 탭 ────────────────────────────────────────────────
