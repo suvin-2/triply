@@ -160,12 +160,30 @@
 }
 
 // ─── 송금 내역 탭 ─────────────────────────────────────────────────
+.separator {
+  height: 6px;
+  background: #f4f1ea;
+  flex-shrink: 0;
+}
+
+.transferSection {
+  // wrapper — 레이블 + 리스트 묶음
+}
+
+.transferSectionLabel {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $mute;
+  padding: 14px 20px 10px;
+}
+
 .transferList {
-  padding: 4px $screen-px 0;
+  padding: 0 20px;
 }
 
 .emptyTransfers {
-  padding: 60px 0;
+  padding: 48px 0;
   text-align: center;
 }
 
@@ -185,11 +203,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 20px 0;
+  padding: 12px 0;
   border-top: none;
   border-left: none;
   border-right: none;
-  border-bottom: 1px solid $line;
+  border-bottom: 0.5px solid $line;
   width: 100%;
   background: transparent;
   font-family: inherit;
@@ -215,8 +233,8 @@
 }
 
 .fromName {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  color: $ink;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -230,8 +248,8 @@
 }
 
 .toName {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  color: $ink;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -239,9 +257,10 @@
 }
 
 .transferAmount {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: $font-mono;
+  color: $ink;
   flex-shrink: 0;
 }
 

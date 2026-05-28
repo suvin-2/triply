@@ -10,11 +10,17 @@ test("TC-182: 잘못된 roomId settle → 에러 + 홈으로 돌아가기", asyn
   await expect(page.getByText(/홈으로 돌아가기/)).toBeVisible();
 });
 
+const TEST_OWNER_TOKEN = "e2e-settle-owner-token";
+
 test.describe("정산 결과 화면 — TC-080~094", () => {
   let roomId = "";
 
   test.beforeEach(async ({ page }) => {
-    roomId = await createTestRoom({ name: "정산테스트방", members: ["A", "B", "C"] });
+    roomId = await createTestRoom({
+      name: "정산테스트방",
+      members: ["A", "B", "C"],
+      ownerToken: TEST_OWNER_TOKEN,
+    });
     // A가 전부 냄 (B, C가 각각 A에게 송금해야 함)
     await addExpenseToRoom(roomId, {
       title: "숙소",
@@ -23,9 +29,14 @@ test.describe("정산 결과 화면 — TC-080~094", () => {
       splitWith: ["A", "B", "C"],
       category: "숙소",
     });
-    await page.addInitScript((id) => {
-      localStorage.setItem("triply_rooms", JSON.stringify([id]));
-    }, roomId);
+    // triply_owner_{id} 설정 → isOwner() 통과 → 정산 완료하기 버튼 노출
+    await page.addInitScript(
+      ({ id, token }) => {
+        localStorage.setItem("triply_rooms", JSON.stringify([id]));
+        localStorage.setItem(`triply_owner_${id}`, token);
+      },
+      { id: roomId, token: TEST_OWNER_TOKEN },
+    );
     await page.goto(`/room/${roomId}/settle`);
     await expect(page.getByText("정산테스트방")).toBeVisible({ timeout: 10000 });
   });
@@ -65,20 +76,20 @@ test.describe("정산 결과 화면 — TC-080~094", () => {
 
   /* TC-089: 정산 완료 버튼 클릭 → 다이얼로그 */
   test("TC-089: 정산 완료 버튼 → 확인 다이얼로그 표시", async ({ page }) => {
-    await page.getByRole("button", { name: /정산 완료로 표시하기/ }).click();
+    await page.getByRole("button", { name: /정산 완료하기/ }).click();
     await expect(page.getByText(/정말 정산 완료로 표시할까요/)).toBeVisible();
   });
 
   /* TC-090: 다이얼로그 취소 */
   test("TC-090: 다이얼로그 취소 → 닫힘", async ({ page }) => {
-    await page.getByRole("button", { name: /정산 완료로 표시하기/ }).click();
+    await page.getByRole("button", { name: /정산 완료하기/ }).click();
     await page.getByRole("button", { name: "취소" }).click();
     await expect(page.getByText(/정말 정산 완료로 표시할까요/)).not.toBeVisible();
   });
 
   /* TC-091: 다이얼로그 바깥 클릭 → 닫힘 */
   test("TC-091: 다이얼로그 오버레이 클릭 → 닫힘", async ({ page }) => {
-    await page.getByRole("button", { name: /정산 완료로 표시하기/ }).click();
+    await page.getByRole("button", { name: /정산 완료하기/ }).click();
     await expect(page.getByText(/정말 정산 완료로 표시할까요/)).toBeVisible();
     // 다이얼로그 오버레이 클릭 (다이얼로그 밖)
     await page.locator('[class*="dialogOverlay"]').click({ position: { x: 10, y: 10 } });
@@ -87,8 +98,7 @@ test.describe("정산 결과 화면 — TC-080~094", () => {
 
   /* TC-092: 정산 완료 확인 → Firebase status:done → 홈 이동 */
   test("TC-092: 완료로 표시 → Firebase 업데이트 후 홈 이동", async ({ page }) => {
-    await page.getByRole("button", { name: /정산 완료로 표시하기/ }).click();
-    // exact: true로 "정산 완료로 표시하기"와 구분
+    await page.getByRole("button", { name: /정산 완료하기/ }).click();
     await page.locator('[class*="dialogConfirm"]').click();
     await expect(page).toHaveURL("/", { timeout: 10000 });
   });
@@ -101,12 +111,10 @@ test.describe("정산 결과 화면 — TC-080~094", () => {
 
   /* TC-084: 토스 딥링크 버튼 */
   test("TC-084: 토스 버튼 클릭 → supertoss:// 스킴 호출 시도", async ({ page }) => {
-    // 딥링크는 브라우저에서 URL 이동을 시도함 (에러 없이 동작해야 함)
-    const [, tossBtn] = await Promise.all([
-      page.waitForEvent("load", { timeout: 2000 }).catch(() => null),
-      page.getByRole("button", { name: "토스" }).first(),
-    ]);
-    await expect(tossBtn).toBeVisible();
+    // transfer row 클릭 → PaymentSheet 열림 → 토스 버튼 확인
+    await page.locator('[class*="transferRow"]').first().click();
+    const tossBtn = page.getByRole("button", { name: /토스/ });
+    await expect(tossBtn).toBeVisible({ timeout: 5000 });
     // 버튼 클릭은 에러 없이 동작
     await tossBtn.click();
   });
@@ -143,7 +151,7 @@ test("TC-094: 균등 분담 → 정산 불필요 메시지", async ({ page }) =>
 });
 
 /* TC-181: 이미 정산완료된 방 */
-test("TC-181: done 방 — 완료 버튼 비활성화", async ({ page }) => {
+test("TC-181: done 방 — 비소유자에게 정산 완료하기 버튼 미노출", async ({ page }) => {
   const roomId = await createTestRoom({
     name: "완료방테스트",
     members: ["A", "B"],
@@ -154,9 +162,10 @@ test("TC-181: done 방 — 완료 버튼 비활성화", async ({ page }) => {
     localStorage.setItem("triply_rooms", JSON.stringify([id]));
   }, roomId);
   await page.goto(`/room/${roomId}/settle`);
+  await expect(page.getByText("완료방테스트")).toBeVisible({ timeout: 10000 });
 
-  await expect(page.getByText(/이미 정산 완료된 여행이에요/)).toBeVisible({ timeout: 10000 });
-  await expect(page.getByRole("button", { name: /이미 정산 완료된 여행이에요/ })).toBeDisabled();
+  // 비소유자에게는 정산 완료하기 버튼이 표시되지 않음
+  await expect(page.getByRole("button", { name: /정산 완료하기/ })).not.toBeVisible();
 
   await deleteTestRoom(roomId);
 });

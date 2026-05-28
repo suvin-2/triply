@@ -1,4 +1,4 @@
-import type { Expense, Transfer } from '../types';
+import type { Expense, Transfer } from "../types";
 
 /**
  * 여행 멤버들의 지출 내역을 바탕으로 최소 송금 횟수를 계산한다.
@@ -26,9 +26,9 @@ export function calcSettlement(
     });
   });
 
-  // 100원 단위 반올림 — 소수점 잔액으로 인한 무한 루프 방지
+  // 소수점 부동소수점 오차(n/3 등) 제거 — 1원 단위로 반올림
   Object.keys(balance).forEach((k) => {
-    balance[k] = Math.round(balance[k] / 100) * 100;
+    balance[k] = Math.round(balance[k]);
   });
 
   const creditors: { name: string; amount: number }[] = [];

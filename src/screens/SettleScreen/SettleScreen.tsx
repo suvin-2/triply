@@ -12,6 +12,7 @@ import { Chevron } from "../../components/shared/atoms";
 import { DropdownMenu, type MenuItem } from "../../components/shared/DropdownMenu";
 import ReceiptCard from "./ReceiptCard";
 import PaymentSheet from "./PaymentSheet";
+import MemberBalanceSection from "./MemberBalanceSection";
 import s from "./SettleScreen.module.scss";
 import { LoadingBar } from "../../components/shared/LoadingBar";
 
@@ -122,7 +123,7 @@ export default function SettleScreen() {
     );
   }
 
-  const { transfers } = calcSettlement(room.members, room.expenses);
+  const { transfers, balance } = calcSettlement(room.members, room.expenses);
   const total = room.expenses.reduce((sum, e) => sum + e.amount, 0);
   // async 클로저에서 TypeScript가 room을 다시 null로 볼 수 있으므로 미리 캡처
   const roomName = room.name;
@@ -376,30 +377,37 @@ export default function SettleScreen() {
       <div className={s.tabContent}>
         {/* 송금 내역 탭 */}
         {tab === "transfers" && (
-          <div className={s.transferList}>
-            {transfers.length === 0 ? (
-              <div className={s.emptyTransfers}>
-                <p className={s.emptyTitle}>정산이 필요 없어요</p>
-                <p className={s.emptySub}>모두 균등하게 나눠냈어요.</p>
-              </div>
-            ) : (
-              transfers.map((t, i) => (
-                <button
-                  key={i}
-                  className={s.transferRow}
-                  onClick={() => setSelectedTransfer(t)}
-                  aria-label={`${t.from}에서 ${t.to}로 ${fmt(t.amount)}원 송금`}
-                >
-                  <div className={s.transferParties}>
-                    <span className={s.fromName}>{t.from}</span>
-                    <span className={s.arrow}>→</span>
-                    <span className={s.toName}>{t.to}</span>
+          <>
+            <MemberBalanceSection members={room.members} balance={balance} />
+            <div className={s.separator} />
+            <div className={s.transferSection}>
+              <p className={s.transferSectionLabel}>송금 내역</p>
+              <div className={s.transferList}>
+                {transfers.length === 0 ? (
+                  <div className={s.emptyTransfers}>
+                    <p className={s.emptyTitle}>정산이 필요 없어요</p>
+                    <p className={s.emptySub}>모두 균등하게 나눠냈어요.</p>
                   </div>
-                  <div className={`mono ${s.transferAmount}`}>{fmt(t.amount)}원</div>
-                </button>
-              ))
-            )}
-          </div>
+                ) : (
+                  transfers.map((t, i) => (
+                    <button
+                      key={i}
+                      className={s.transferRow}
+                      onClick={() => setSelectedTransfer(t)}
+                      aria-label={`${t.from}에서 ${t.to}로 ${fmt(t.amount)}원 송금`}
+                    >
+                      <div className={s.transferParties}>
+                        <span className={s.fromName}>{t.from}</span>
+                        <span className={s.arrow}>→</span>
+                        <span className={s.toName}>{t.to}</span>
+                      </div>
+                      <div className={`mono ${s.transferAmount}`}>{fmt(t.amount)}원</div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* 영수증 카드 탭 */}
